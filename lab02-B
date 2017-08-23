@@ -1,1 +1,66 @@
 
+;cameron gan
+
+;lab02 q2
+
+
+.dseg
+.org
+	array: .byte 20 ;
+
+.cseg
+.def n=r16
+.def x=r17
+
+ldi n, 10
+ldi x, 3
+
+
+
+main:
+.def i=r20
+
+.def sum_l=r22
+.def sum_h=r23
+.def result_l=r24
+.def result_h=r25
+
+clr sum_l
+clr sum_h
+clr i
+
+
+forloop1:
+		
+
+
+	cp n, i
+
+	brlt end
+	inc i
+	power x, i, result_l,result_h
+
+
+end: rjmp end
+
+
+;macro here for power
+.macro power 
+	;@0 = x
+	;@1 = i
+	;@2 = result_l
+	;@3 = result_h
+	ldi r18, 1
+	ldi r19, high(1)
+	.def count=r21
+	ldi count, 1
+	loop:
+		cp @1, count
+		brlt endloop
+		mul r18, @0
+		mov r18, r0
+
+		rjmp loop
+;
+	endloop:
+.endmacro
