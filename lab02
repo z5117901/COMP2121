@@ -1,0 +1,75 @@
+;
+; Lab02.asm
+;
+; Created: 23/08/2017 10:41:54 AM
+; Author : Cameron Gan
+;
+
+
+; Replace with your application code
+.dseg
+;WHAT DO I PUT HERE!!!
+
+
+
+
+.cseg
+;WHAT GOES HERE????
+.def dividend_l=r15
+.def dividend_h=r16
+.def divisor_l=r17
+.def divisor_h=r18
+.def quotient_l=r19
+.def quotient_h=r20
+
+.def bit_position_l=r21
+.def bit_position_h=r22
+
+clr quotient_l
+clr quotient_h
+ldi bit_position_l, low(1)
+ldi bit_position_h, high(1)
+
+
+;while((dividend > divisor) && !(divisor & 0x8000))
+whileloop1:
+	;divisor = divisor << 1
+	lsl divisor_l
+	adc divisor_h, 0
+	lsl divisor_h
+
+	;divisor = divisor << 1
+	lsl bit_position_l
+	adc bit_position_h, 0
+	lsl bit_position_h
+
+	;(dividend > divisor)
+	cp dividend_l, divisor_l
+	cpc dividend_h, divisor__h
+	brlt whileloop2
+
+	;!(divisor & 0x8000)
+	cp divisor_l, 0x8000
+	cpc divisor_h, 0x8000
+	breq whileloop2
+
+
+;(bit_position > 0)
+whileloop2:
+
+	;if (dividend >= divisor)
+	cp dividend_l, divisor_l
+	cpc dividend_h, divisor_h
+	brge if1
+	if1:
+		;dividend = dividend - divisor
+		sub dividend_l, divisor_l
+		sbc dividend_h, divisor_h
+
+		;quotient = quotiend + bit_position
+		add quotient_l, bit_position_l
+		adc quotient_h, bit_position_h
+
+
+	
+
