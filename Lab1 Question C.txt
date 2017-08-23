@@ -1,0 +1,49 @@
+.include "m2560def.inc"
+
+.def i=r16
+.def const_200 = r17
+.def temp_sum_L = r23
+.def temp_sum_H = r24
+
+
+.dseg
+.org 0x200 					; Stated on WEBCSM3 Page
+	array: .byte 20			; Reserving 20 bytes for the array 
+	sum: .byte 2			; Reserving 2 bytes for sum
+
+.cseg
+.org 0x000					; Starting at 0x000
+	clr temp_sum_L
+	clr temp_sum_L
+	clr i					; Initialising the label i to 0
+	ldi const_200, 200
+	ldi xl, low(array)		; x-pointer
+	ldi xh, high(array)
+	ldi yl, low(sum)		; y-pointer 
+	ldi yh, high(sum)
+
+main: 						; Label for main
+	for1:					; Label for first for loop
+		mul i,const_200		; 200*i
+		st x+, r0			; Store r0 indirectly and post increment
+		st x+, r1			; Store r1 indirectly and post increment
+		inc i 				; Increment i
+		cpi i,10			; Comparing value in i to 10
+		brlt for1			; Maintail condition that i < 10
+
+	clr i 					;Once we start here, the first loop done
+	ldi xl, low(array)		;Let x-pointer point
+	ldi xh, high(array)
+
+	for2:
+		ld r18, x+			;Load indirectly and post increment
+		ld r19, x+			;Load indirectly and post increment
+		add temp_sum_L, r18	; Add the value of register 18 (holds low)
+		adc temp_sum_H, r19	; Add value of register 19
+		inc i
+		cpi i, 10
+		brlt for2
+		st y+, temp_sum_L	;Store indirectly and post increment 
+		st y+, temp_sum_H	;Store indirectly and post increment
+end:
+	rjmp end

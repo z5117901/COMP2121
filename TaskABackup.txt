@@ -1,0 +1,35 @@
+.include "m2560def.inc"
+.dseg
+
+;Initialising two byte A
+.def a_l = r16 				;Little endian, least significant byte stored in low address
+.def a_h = r17
+
+;Initialising two byte B 
+.def b_l = r18
+.def b_h = r19
+
+.cseg
+ldi a_l, low(1000)			; Loead immediate the low b
+ldi a_h, high(1000)
+
+ldi b_l, low(2000)
+ldi b_h, high(2000)
+;While Loop Body
+while:
+	cp a_l, b_l
+	cpc a_h, b_h
+	breq end				;If equal to then jump straight to end
+;First if scenario a=a-b							
+   	brlo case1				;Basically the else
+   	sub a_l,b_l
+	sbc a_h,b_h
+	rjmp while
+;Second scenario b=b-a
+case1:						
+	sub b_l,a_l
+	sbc b_h,a_h
+	rjmp while
+end:
+
+halt: rjmp halt 

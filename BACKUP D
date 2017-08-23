@@ -1,0 +1,134 @@
+;
+; Lab1 Final.asm
+;
+; Created: 8/17/2017 11:22:46 AM
+; Author : L
+;
+.include "m2560def.inc"
+
+.def i=r4
+.def j=r5
+.def k=r6
+.def temp=r16
+.def counter=r17
+.def five=r18
+.def Aik=r19
+.def Bkj=r20
+.def C_low=r21
+.def C_high=r22
+
+.dseg
+.org 0x300
+	A: .byte 25
+	B: .byte 25
+	C: .byte 50
+
+.cseg 
+.org 0x000
+	clr i
+	clr j
+	clr k
+	clr temp
+	clr counter
+	clr Aik
+	clr Bkj
+	ldi five,5
+	ldi zl,low(C)
+	ldi zh,high(C)
+	ldi yl,low(B)
+	ldi yh,high(B)
+	ldi xl,low(A)
+	ldi xh,high(A)
+
+
+main: 
+	;This segment is loading the respective arithmetic results into A,B and C
+	forloop1:
+		clr j
+		forloop1_1:
+		add temp,i
+		add temp,j
+		st x+, temp			;A[i][j] = i + j
+		clr temp
+		add temp,i
+		sub temp,j
+		st y+, temp			;B[i][j] = i - j
+		clr temp
+		st z+, temp 		;C[i][j] = 0
+
+		inc j
+		cp j,five
+		brlt forloop1_1
+	inc i
+	cp i,five
+	brlt forloop1
+
+	clr i
+	;Start of the 2nd set of loops that computes C[i][j]+= A[i][k]*B[k][j]
+	forloop2i:
+		ldi xl,low(A)
+		ldi xh,high(A)
+		clr counter			;Safe measures
+		rjmp cond1
+
+		forloop2:
+			clr j
+			forloop2_1:
+				ldi yl,low(B)
+				ldi yh,high(B)
+				clr counter
+				rjmp cond2
+
+				forloop_store:
+					clr k
+
+					forloop2_2:
+					ld Aik,x+ 
+					ld BKJ,y
+					adiw yh:yl, 5		;Has to go down by 5
+					muls BKj, Aik
+					add C_low,r0
+					adc C_high, r1
+					inc k
+					cp k,five
+					brlt forloop2_2
+
+				sbiw xh:xl,5
+				st z+,C_low
+				st z+,C_high
+				clr C_low
+				clr C_high
+				inc j
+				cp j,five
+				brlt forloop2_1
+
+		inc i
+		cp i,five
+		brlt forloop2
+		rjmp end
+
+
+;x-pointer increments
+x_pointer:
+	inc counter
+	adiw xh:xl,5			;Add 5 to the x-pointer
+
+		cond1:
+			mov r14,i
+			cp counter,r14
+			brlo x_pointer
+			rjmp forloop2
+
+;y-pointer increments
+y_pointer:
+	inc counter
+	adiw yh:yl, 1
+
+		cond2:
+			mov r15,j
+			cp counter,r15
+			brlo y_pointer
+			rjmp forloop_store
+
+end:
+	rjmp end
