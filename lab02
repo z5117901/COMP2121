@@ -7,6 +7,7 @@
 
 
 ; Replace with your application code
+rjmp main
 .dseg
 ;WHAT DO I PUT HERE!!!
 
@@ -15,6 +16,7 @@
 
 .cseg
 ;WHAT GOES HERE????
+main:
 .def dividend_l=r15
 .def dividend_h=r16
 .def divisor_l=r17
@@ -25,34 +27,47 @@
 .def bit_position_l=r21
 .def bit_position_h=r22
 
-clr quotient_l
-clr quotient_h
+.def zero=r23
+.def constant_l=r24
+.def constant_h=r25
+
+ldi constant_l, low(0x8000)
+ldi constant_h, high(0x8000)
+ldi zero, low(0)
+
+ldi quotient_l, 0
+ldi quotient_h, 0
 ldi bit_position_l, low(1)
 ldi bit_position_h, high(1)
+
+ldi r26, low(3217)
+mov r15, r26
+ldi divisor_l, low(16)
+ldi divisor_h, high(16)
+;ldi dividend_l, low(3217)
+ldi dividend_h, high(3217)
 
 
 ;while((dividend > divisor) && !(divisor & 0x8000))
 whileloop1:
 	;divisor = divisor << 1
 	lsl divisor_l
-	adc divisor_h, 0
-	lsl divisor_h
+	rol divisor_h
 
-	;divisor = divisor << 1
+	;bit_position = bit_position << 1
 	lsl bit_position_l
-	adc bit_position_h, 0
-	lsl bit_position_h
+	rol bit_position_h
 
 	;(dividend > divisor)
-	cp dividend_l, divisor_l
-	cpc dividend_h, divisor__h
-	brlt whileloop2
+	cp divisor_l, dividend_l
+	cpc divisor_h, dividend_h
+	brge whileloop2
 
 	;!(divisor & 0x8000)
-	cp divisor_l, 0x8000
-	cpc divisor_h, 0x8000
+	cp divisor_l, constant_l
+	cpc divisor_h, constant_h
 	breq whileloop2
-
+	rjmp whileloop1
 
 ;(bit_position > 0)
 whileloop2:
@@ -61,6 +76,7 @@ whileloop2:
 	cp dividend_l, divisor_l
 	cpc dividend_h, divisor_h
 	brge if1
+	rjmp after
 	if1:
 		;dividend = dividend - divisor
 		sub dividend_l, divisor_l
@@ -70,6 +86,18 @@ whileloop2:
 		add quotient_l, bit_position_l
 		adc quotient_h, bit_position_h
 
+	after:
+	;divisor = divisor >> 1
+	lsr divisor_h
+	ror divisor_l
 
+	;bit_position = bit_position >> 1
+	lsr bit_position_h
+	ror bit_position_l
 	
+	cp zero, bit_position_l
+	cpc zero, bit_position_h
+	brge end
+	rjmp whileloop2
 
+end: rjmp end
