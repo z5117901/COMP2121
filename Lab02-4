@@ -1,0 +1,217 @@
+;
+; Lab02D.asm
+;
+; Created: 5/09/2017 4:51:16 PM
+; Author : Cameron Gan
+;
+
+.include "m2560def.inc"
+
+.dseg //Global Variables
+Counter: .byte 1
+
+.cseg
+rjmp reset
+//All constants go here
+reset:
+
+	// Initialise Global Variable
+	ldi ZL, low(0)
+	ldi ZH, high(0)
+	lpm r16, Z
+	sts Counter, r16 //lds r16, Counter // load and store to global variable
+
+	// initialise stack pointer
+	ldi YL, low(RAMEND-4)
+	ldi YH, high(RAMEND-4)
+	out SPL, YL
+	out SPH, YH
+
+	rcall main
+	//.... 
+	halt: rjmp halt
+
+///////////////////////////////////
+main:
+	//prologue
+	in YL, SPL
+	in YH, SPH
+	sbiw Y, 4
+	out SPL, YL
+	out SPH, YH
+	
+	//initialise local variable
+	//int n=8, A=1, B=2, C=3;
+	ldi ZL, low(8)
+	ldi ZH, high(8)
+	lpm r16, Z
+	std Y+1, ZL
+	//A
+	ldi ZL, low(1)
+	ldi ZH, high(1)
+	lpm r16, Z
+	std Y+2, ZL
+	//B
+	ldi ZL, low(2)
+	ldi ZH, high(2)
+	lpm r16, Z
+	std Y+3, ZL
+	//C
+	ldi ZL, low(3)
+	ldi ZH, high(3)
+	lpm r16, Z
+	std Y+4, ZL
+	//body
+	ldd r16, Y+1	//n
+	ldd r17, Y+2	//A
+	ldd r18, Y+3	//B
+	ldd r19, Y+4	//C
+
+	movw X, Y
+
+	in YL, SPL
+	in YH, SPH
+	sbiw Y, 12 //SOME NUMBER
+
+	std Y+1, r16 // to int N
+	std Y+2, r17 // to int A
+	std Y+3, r18	//to int B
+	std Y+4, r19	//to int C
+
+	rcall move
+
+	movW Y, X
+
+	lds r16, Counter
+
+	//.....
+	//epilogue
+	in YL, SPL
+	in YH, SPH
+	adiw Y, 4
+	out SPL, YL
+	out SPH, YH
+//....
+ret
+///////////////////////////////////
+move: 
+	//Prologue
+	push YL
+	push YH
+	push XL
+	push XH
+	push r16
+	push r17
+	push r18
+	push r19
+
+	in YL, SPL
+	in YH, SPH
+	sbiw Y, 4
+	out SPL, YL
+	out SPH, YH
+
+	//body
+	ldd r16, Y+1
+	cpi r16, 1
+	brne else
+	//if(n==1)
+		lds r20, Counter
+		inc r20
+		sts Counter, r20
+		rjmp move_epilogue
+	else:
+		//Move(n-1, A, B, C)
+		ldd r16, Y+1	//n
+		ldd r17, Y+2	//A
+		ldd r18, Y+3	//B
+		ldd r19, Y+4	//C
+
+		//n-1
+		dec r16
+
+		movw X, Y
+
+		in YL, SPL
+		in YH, SPH
+		sbiw Y, 12 //SOME NUMBER
+
+		std Y+1, r16 // to int N
+		std Y+2, r17 // to int A
+		std Y+3, r18	//to int B
+		std Y+4, r19	//to int C
+
+		rcall move
+
+		movw Y, X
+
+		//Move(1, A, C, B)
+		ldd r16, Y+1	//n
+		ldd r17, Y+2	//A
+		ldd r19, Y+3	//C
+		ldd r18, Y+4	//B
+
+		//n=1
+		ldi r16, 1
+
+		movw X, Y
+
+		in YL, SPL
+		in YH, SPH
+		sbiw Y, 12 //SOME NUMBER
+
+		std Y+1, r16 // to int N
+		std Y+2, r17 // to int A
+		std Y+3, r19	//to int C
+		std Y+4, r18	//to int B
+
+		rcall move
+
+		movw Y, X
+
+		ldd r16, Y+1	//n
+		ldd r18, Y+2	//B
+		ldd r19, Y+3	//C
+		ldd r17, Y+4	//A
+
+		//n-1
+		dec r16
+
+		movw X, Y
+
+		in YL, SPL
+		in YH, SPH
+		sbiw Y, 12 //SOME NUMBER
+
+		std Y+1, r16 // to int N
+		std Y+2, r17 // to int A
+		std Y+3, r19	//to int C
+		std Y+4, r18	//to int B
+
+		rcall move
+
+		movw Y, X
+		rjmp move_epilogue
+
+	
+
+	//epilogue
+	move_epilogue:
+
+	pop r19
+	pop r18
+	pop r17
+	pop r16
+	pop XH
+	pop XL
+	pop YH
+	pop YL
+
+	in YL, SPL
+	in YH, SPH
+	adiw Y, 12
+	out SPL, YL
+	out SPH, YH
+
+ret ///// VOID
+////////////////////////////////////
