@@ -1,9 +1,6 @@
-; Authors: 
-
-
 .include "m2560def.inc"
 
-
+.def r15, zero
 .def r16, mainCount
 .def r17, powCount
 .def r18, sum_l
@@ -11,6 +8,14 @@
 .def r24, result_l
 .def r25, result_h
 
+.macro schlump ; a *b
+	mul @0, @2	; a_l * b_l
+	movw @5:@4, r1:r0
+	mul @1, @2	; a_h * b_h
+	add @5, r0
+	mul @0, @3	; b_h * a_l
+	add @5, r0
+.endmacro
  
 .dseg	;data segment
 //global vars
@@ -23,38 +28,43 @@ n: .byte 1
 	constant_2: .db 3
 
 reset:
-	ldi zL, low(constant_1)
+	ldi zL, low(constant_1)		; setting global vals
 	ldi zH, high(constant_1)
 	lpm r16, Z
-	sts x, r16
+	sts x, r16					
 	ldi zL, low(constant_2)
 	ldi zH, high(constant_2)
 	lpm r16, Z
 	sts n, r16
 	
-	ldi yl, low(ramend)
-	ldi yh, high(ramend)
-	out sph, yl
-	out spl, yh
-		
 	rcall main
 
 	halt: rjmp halt
 /////////////////
 
 main:
-	clr sum_l
+
+	ldi yl, low(ramend-4)	;initiating stack
+	ldi yh, high(ramend-4)
+	out sph, yl
+	out spl, yh
+
+	clr sum_l		;sum = 0
 	clr sum_h
-	clr mainCount
+	clr mainCount	; mainC = 0
 	
 	
 	loopPoint:
 	cpi n, mainCount
 	brlt end	; loop condition
-	push mainCount	; puttin onto stack
+	std y+1, mainCount
+	ldd r22, y+1
 	rcall pow		; calling power function
-	pop result_h	; returnin func values which loaded onto stack
-	pop result_l
+
+	std y+1, r24
+	std y+2, r25
+	;pop result_h	; returnin func values which loaded onto stack
+	;pop result_l
 	inc mainCount
 	rjmp loopPoint
 	end:
@@ -62,22 +72,53 @@ ret
 
 //////////////////////
 
-
 pow: 
-	pop powCount	//pop variables off stack
-	
-	powLoop:
+	;prologue:
+	push yl
+	push yh
+	push r16; powCount
+	push r17
+	push r18
+	push r19
+	push zero
+	in yl, spl
+	in yh sph
+	sbiw yh:yl, 8
+	out sph yh
+	out spl yl
 
+	std y+1, r22
+	;body
 
+	clr zero
+	clr r23		; initialing  i to 0
+	clr r21		; initializing num to 1
+	ldi r20, 1
+	ldd r24, y+1	; load power
+	ldi r16, x		; put x(global var into r17)
+	ldi r17, high(x)
+	loop:
+	cp r16, r23; comparing i with power
+	brlt done		; if power < i
+	schlump r20, r21, r16, r17, r18, r19; num *= x
+	movw r21:r20, r19:r18
+	inc 23
+	rjmp loop
 
-	
-//push result back onto stack
-	push result_l
-	push result_h
-ret
+done:
+	movw r25:r24, r21:r20
 
-/////////////////////
-
-.macro schlump
-
-.endmacro
+	;epilogue
+	// need to de-allocate  space used 
+	adiw yh:yl, 8
+	out sph, yh
+	out spl, yl
+	pop zero
+	pop r19
+	pop r18
+	pop r17
+	pop r16
+	pop r29	;the stac pointrs
+	pop r28
+	; end of epilogue
+ret; back to main
