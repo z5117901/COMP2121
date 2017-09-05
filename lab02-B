@@ -122,3 +122,5 @@ done:
 	pop r28
 	; end of epilogue
 ret; back to main
+
+//http://www.cse.unsw.edu.au/~cs2121/LectureNotes/week6_notes.pdf this was extremely helpful
