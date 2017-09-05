@@ -1,14 +1,14 @@
 .include "m2560def.inc"
 
-.def r15, zero
-.def r16, mainCount
-.def r17, powCount
-.def r18, sum_l
-.def r19, sum_h
-.def r24, result_l
-.def r25, result_h
+.def zero = r15
+.def mainCount = r16
+.def powCount = r17
+.def sum_l = r18
+.def sum_h = r19
+.def result_l = r24
+.def result_h = r25
 
-.macro schlump ; a *b
+.macro schlump ; a *b (schlump is my bad attempt to mix words, result, num & power(sounds fun))
 	mul @0, @2	; a_l * b_l
 	movw @5:@4, r1:r0
 	mul @1, @2	; a_h * b_h
@@ -19,7 +19,7 @@
  
 .dseg	;data segment
 //global vars
-x: .byte 1
+XES: .byte 1
 n: .byte 1
 
 .cseg
@@ -31,7 +31,7 @@ reset:
 	ldi zL, low(constant_1)		; setting global vals
 	ldi zH, high(constant_1)
 	lpm r16, Z
-	sts x, r16					
+	sts XES, r16					
 	ldi zL, low(constant_2)
 	ldi zH, high(constant_2)
 	lpm r16, Z
@@ -82,21 +82,21 @@ pow:
 	push r19
 	push zero
 	in yl, spl
-	in yh sph
+	in yh, sph
 	sbiw yh:yl, 8
-	out sph yh
-	out spl yl
+	out sph, yh
+	out spl, yl
+	std y+1, r22 ; passing maincount to power
 
-	std y+1, r22
 	;body
 
 	clr zero
 	clr r23		; initialing  i to 0
 	clr r21		; initializing num to 1
 	ldi r20, 1
-	ldd r24, y+1	; load power
-	ldi r16, x		; put x(global var into r17)
-	ldi r17, high(x)
+	ldd r23, y+1	; load power
+	ldi r16, 3		; put x(global var into r17:r16)
+	ldi r17, high(3)
 	loop:
 	cp r16, r23; comparing i with power
 	brlt done		; if power < i
@@ -122,5 +122,6 @@ done:
 	pop r28
 	; end of epilogue
 ret; back to main
+
 
 //http://www.cse.unsw.edu.au/~cs2121/LectureNotes/week6_notes.pdf this was extremely helpful
