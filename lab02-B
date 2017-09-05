@@ -1,66 +1,83 @@
-
-;cameron gan
-
-;lab02 q2
+; Authors: 
 
 
-.dseg
-.org
-	array: .byte 20 ;
+.include "m2560def.inc"
+
+
+.def r16, mainCount
+.def r17, powCount
+.def r18, sum_l
+.def r19, sum_h
+.def r24, result_l
+.def r25, result_h
+
+ 
+.dseg	;data segment
+//global vars
+x: .byte 1
+n: .byte 1
 
 .cseg
-.def n=r16
-.def x=r17
+	rjmp reset
+	constant_1: .db 10
+	constant_2: .db 3
 
-ldi n, 10
-ldi x, 3
+reset:
+	ldi zL, low(constant_1)
+	ldi zH, high(constant_1)
+	lpm r16, Z
+	sts x, r16
+	ldi zL, low(constant_2)
+	ldi zH, high(constant_2)
+	lpm r16, Z
+	sts n, r16
+	
+	ldi yl, low(ramend)
+	ldi yh, high(ramend)
+	out sph, yl
+	out spl, yh
+		
+	rcall main
 
-
+	halt: rjmp halt
+/////////////////
 
 main:
-.def i=r20
+	clr sum_l
+	clr sum_h
+	clr mainCount
+	
+	
+	loopPoint:
+	cpi n, mainCount
+	brlt end	; loop condition
+	push mainCount	; puttin onto stack
+	rcall pow		; calling power function
+	pop result_h	; returnin func values which loaded onto stack
+	pop result_l
+	inc mainCount
+	rjmp loopPoint
+	end:
+ret
 
-.def sum_l=r22
-.def sum_h=r23
-.def result_l=r24
-.def result_h=r25
-
-clr sum_l
-clr sum_h
-clr i
-
-
-forloop1:
-		
-
-
-	cp n, i
-
-	brlt end
-	inc i
-	power x, i, result_l,result_h
+//////////////////////
 
 
-end: rjmp end
+pow: 
+	pop powCount	//pop variables off stack
+	
+	powLoop:
 
 
-;macro here for power
-.macro power 
-	;@0 = x
-	;@1 = i
-	;@2 = result_l
-	;@3 = result_h
-	ldi r18, 1
-	ldi r19, high(1)
-	.def count=r21
-	ldi count, 1
-	loop:
-		cp @1, count
-		brlt endloop
-		mul r18, @0
-		mov r18, r0
 
-		rjmp loop
-;
-	endloop:
+	
+//push result back onto stack
+	push result_l
+	push result_h
+ret
+
+/////////////////////
+
+.macro schlump
+
 .endmacro
