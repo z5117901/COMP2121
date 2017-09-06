@@ -1,0 +1,205 @@
+.include "m2560def.inc"
+
+.def n=r16
+.def number=r17
+.def i_r=r18
+.def i_p=r19
+.def n_p=r20
+.def ipow=r21
+.def inum=r22
+.def num_l=r24
+.def num_h=r25
+
+.def sum3=r13
+.def sum2=r12
+.def sum1=r11
+
+.dseg
+.org 0x200
+n_number_d: .byte 2
+
+.macro mumu
+
+	mul @8,@6
+	mov @5,@1
+	mov @4,@0
+	mul @7,@6
+	add @3,@0
+	adc @4,@1
+	adc @5,@2
+
+.endmacro
+
+
+.cseg
+.org 0x000
+in_n: .db 10
+in_x: .db 3
+in_imain: .db 0
+in_ipow: .db 1
+in_num: .db 1
+in_sum: .db 0
+
+	;store globle varibles in sram
+	ldi zl,low(in_n<<1)
+	ldi zh,high(in_n<<1)
+	lpm r17,z
+	lpm n,z
+	ldi yl,low(n_number_d)
+	ldi yh,high(n_number_d)
+	st y,r17
+	ldi zl,low(in_x<<1)
+	ldi zh,high(in_x<<1)
+	lpm r17,z
+	std y+1,r17
+	
+	ldi zl,low(in_imain<<1)
+	ldi zh,high(in_imain<<1)
+	lpm i_r,z
+	ldi zl,low(in_ipow<<1)
+	ldi zh,high(in_ipow<<1)
+	lpm ipow,z
+	ldi zl,low(in_sum<<1)
+	ldi zh,high(in_sum<<1)
+	lpm sum1,z
+	lpm sum2,z
+	lpm sum3,z
+	ldi zl,low(in_num<<1)
+	ldi zh,high(in_num<<1)
+	lpm inum,z
+
+	
+	ldi zl,low(n_number_d)
+	ldi zh,high(n_number_d)
+	
+	ldi xl,low(RAMEND-17)
+	ldi xh,high(RAMEND-17)
+	
+	;ldi number,3 ;parameter x
+	;std z+1,number
+	;st z,n
+main:
+	;clr i_r
+	;clr sum1
+	ldi yl,low(RAMEND-17)
+	ldi yh,high(RAMEND-17)
+	out spl,yl
+	out sph,yh
+	clr r0
+	std y+17,r0 ;i = 0
+			 
+	std y+14,r0;sum1=0
+	std y+15,r0
+	std y+16,r0;sum5=0
+	adiw xh:xl,1
+
+	loopmain:
+		st x+,i_r ; store i into a[i]
+				  
+		ldd i_p,y+17; parameter i
+		ldd n_p,z+1 
+		rcall power
+		std y+13,r25;store return val in stack
+		std y+12,r24
+		ldd r9,y+13;result_h
+		ldd r8,y+12;result_l
+		clr r1
+		clr r4
+		clr r0
+		clr r3
+		clr r5
+
+		clr r2
+		mumu r0,r1,r2,r3,r4,r5,i_r,r8,r9
+		;mul r9,i_r
+		;mov r5,r1
+		;mov r4,r0
+		;mul r8,i_r
+	
+	;	add r3,r0
+	;	adc r4,r1
+	;	adc r5,r2
+		ldd sum1,y+14
+		ldd sum2,y+15
+		ldd sum3,y+16
+		add sum1,r3
+		adc sum2,r4
+		adc sum3,r5
+
+		std y+14,sum1
+		std y+15,sum2
+		std y+16,sum3
+		ldd i_r,y+17
+		inc i_r
+		std y+17,i_r
+		cp n,i_r
+		brlo end
+		rjmp loopmain
+
+power:
+ 	push r28
+	push r29
+	;push r16
+	in r28,spl
+	in r29,sph
+	sbiw r28,5
+	out sph,r29
+	out spl,r28
+	;pass parameter
+	std y+1,i_p ; power
+	std y+2,n_p ;number 
+	;ini local variable i , num
+	clr r0
+	;ldi r16,1
+	std y+3,inum
+	std y+4,r0
+	std y+5,ipow
+	ldd num_l,y+3
+	ldd num_h,y+4
+	ldd i_p,y+5
+	ldd r10,y+1;r10 is power
+	;ldd n_p,y+2
+	cp r10,i_p
+	brlo return
+	loopsub:
+
+		clr r1
+		clr r4
+		clr r0
+		clr r3
+		clr r5
+		clr r2
+		std y+5,i_p
+		mumu r0,r1,r2,r3,r4,r5,n_p,num_l,num_h
+		;mul num_h,n_p
+		;mov r5,r1
+		;mov r4,r0
+		;mul num_l,n_p
+		;add r3,r0
+		;adc r4,r1
+		;adc r5,r2
+		ldd num_l,y+3
+		ldd num_h,y+4
+		mov num_l,r3
+		mov num_h,r4
+		std y+3,r3
+		std y+4,r4
+		ldd i_p,y+5
+		inc i_p
+		cp  r10,i_p
+		brsh loopsub
+
+	return:
+	ldd r25,y+4
+	ldd r24,y+3
+	adiw r28,5
+	out sph,r29
+	out spl,r28
+	;pop r16
+	pop r29
+	pop r28
+	ret
+
+
+
+end : rjmp end
