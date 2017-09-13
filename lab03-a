@@ -1,0 +1,83 @@
+;Board settings: Connect PB0 and PB1 (push buttons) to PF0 and PF1
+;Connect LED0:LED7 to PC0:PC7  
+ 
+; led.asm
+;
+; Created: 9/4/2017 10:32:15 AM
+; Author : Cameron Gan
+.include "m2560def.inc"
+.def temp =r16
+.def pattern = r17
+.def flag = r18
+.def countl = r19
+.def counth = r20
+.def one=r21
+.cseg
+.org 0x0
+
+ldi one, low(1)
+clr flag
+ldi pattern, 0b1111
+mov temp, pattern
+out PORTC, temp ; Write ones to LED
+out DDRC, temp ; PORTC is all outputs
+out PORTD, temp ; Enable pull-up resistors on PORTF
+clr temp
+out DDRD, temp ; PORTF is all inputs
+
+
+switch0:
+sbic PIND, 0 ; Skip the next instruction if PB0 is pushed
+rjmp switch0 ; If not pushed, check the other switch
+lsr pattern
+	rjmp waitloop20
+	;check btn
+mov temp, PATTERN ; Store PATTERN1 to the LEDs if the switch was pushed
+cpi temp, 0x00
+brne cont1
+ldi PATTERN, 0x0F
+mov temp, PATTERN
+cont1:
+out PORTC, temp
+
+
+
+press:
+cpi flag, 0
+brne waitloop
+	;DO CODE
+
+switch1:
+sbic PIND, 1 ; Skip the next instruction if PB1 is pushed
+rjmp switch0 ; If not pushed, check the other switch
+lsl PATTERN
+inc PATTERN
+;.set PATTERN = PATTERN - 0b00010000
+mov temp, PATTERN ; Store PATTERN2 to the LEDs if the switch was pushed
+cpi temp, 0x1F
+brne cont2
+ldi PATTERN, 0x00
+mov temp, PATTERN
+cont2:
+out PORTC, temp
+rjmp switch0 ; Now check PB0 again
+
+inc flag
+rjmp press
+
+waitloop:
+	clr flag
+	nop
+	cp count,10
+	brgt
+
+
+waitloop20:
+	nop 
+	cp countl, NUM
+	cpc counth, NUM
+	brgt CNT
+	add countl, one
+	adc counth, 
+	
+	rjmp wait
