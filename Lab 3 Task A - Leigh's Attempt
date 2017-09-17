@@ -21,7 +21,7 @@ out PORTC,temp		    ;Writing the ON initial 4LED's to PORTC
 out DDRC,temp		    ;PORTC is output
 out PORTD,temp		    ;Enable pull-up resistor on portD
 clr temp
-out DDDF,temp		    ;PORTD is input
+out DDRD,temp		    ;PORTD is input
 clr zeroL                   ;Setting low to 0
 clr zeroH                   ;Setting high to 0
 
