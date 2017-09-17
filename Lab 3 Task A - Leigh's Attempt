@@ -19,14 +19,14 @@
 ldi temp,ON
 out PORTC,temp		    ;Writing the ON initial 4LED's to PORTC
 out DDRC,temp		    ;PORTC is output
-out PORTF,temp		    ;Enable pull-up resistor on portA
+out PORTD,temp		    ;Enable pull-up resistor on portD
 clr temp
-out DDRF,temp		    ;PORTF is input
+out DDDF,temp		    ;PORTD is input
 clr zeroL                   ;Setting low to 0
 clr zeroH                   ;Setting high to 0
 
 PressA: 
-    sbic PINF,0		    ;Skip next intruction if A pressed 
+    sbic PIND,0		    ;Skip next intruction if A pressed 
     rjmp PressB
     rcall Delay
     cpi temp,0b0000         ;Checking if the LED's are all OFF
@@ -36,7 +36,7 @@ PressA:
     rjmp PressB             ;Move on to see if the next switch is pressed
     
 PressB:
-    sbic PINF,1             ;Skip next instruction if B pressed
+    sbic PIND,1             ;Skip next instruction if B pressed
     rjmp PressA
     rcall Delay
     cpi temp,0b1111         ;Checking if LED's are all ON
