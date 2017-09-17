@@ -1,0 +1,88 @@
+;Lab 3 Task A.asm
+;Author: Leigh Huang	
+;Date: 15/9/2017 
+
+.include "m2560def.inc"
+
+.dseg
+.def temp=r16
+.def zeroL=r17
+.def zeroH=r18
+.def delayL=r24
+.def delayH=r25
+
+.equ OFF = 0b0000
+.equ ON = 0b1111
+
+.cseg
+
+ldi temp,ON
+out PORTC,temp				;Writing the ON initial 4LED's to PORTC
+out DDRC,temp				;PORTC is output
+out PORTF,temp				;Enable pull-up resistor on portA
+clr temp
+out DDRF,temp				;PORTA is input
+clr zeroL                   ;Setting low to 0
+clr zeroH                   ;Setting high to 0
+
+PressA: 
+	sbic PINF,0				;Skip next intruction if A pressed 
+	rjmp PressB
+    rcall Delay
+    cpi temp,0b0000         ;Checking if the LED's are all OFF
+    breq Reset1             ;If they are, reset all LED's to ON
+    dec temp                ;Decreasing LED by 1
+    out PORTC,temp          ;Display new LED output
+    rjmp PressB             ;Move on to see if the next switch is pressed
+    
+PressB:
+    sbic PINF,1             ;Skip next instruction if B pressed
+    rjmp PressA
+    rcall Delay
+    cpi temp,0b1111         ;Checking if LED's are all ON
+    breq Reset0             ;If they are, reset all LED's to OFF
+    inc temp                ;Increasing LED by 1
+    out PORTC,temp          ;Display new LED output
+    rjmp PressA             ;Move on to see if the next switch is pressed
+    
+Reset0:
+    ldi temp,OFF            ;Resetting all LED's to OFF
+    out PortC,temp
+    rjmp PressA             
+
+Reset1:
+    ldi temp,ON             ;Resetting all LED's to ON
+    out PORTC,temp
+    rjmp PressB
+    
+;Function to delay stuff
+
+DelayI:
+push delayL
+push delayH
+ldi delayL,low(65535)
+ldi delayH,high(65535)
+loopdelay:
+    sbiw delayH:delayL,1    ;Decrementing by 1
+    cp delayL,zeroL         ;Check if low is at 0
+    cpc delayH,zeroH        ;Check if high is at 0
+    brne loopdelay          ;Keep going unless 0
+pop delayH
+pop delayL
+ret
+
+Delay:
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+rcall DelayI
+ret
