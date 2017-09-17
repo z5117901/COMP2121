@@ -17,17 +17,17 @@
 .cseg
 
 ldi temp,ON
-out PORTC,temp				;Writing the ON initial 4LED's to PORTC
-out DDRC,temp				;PORTC is output
-out PORTF,temp				;Enable pull-up resistor on portA
+out PORTC,temp		    ;Writing the ON initial 4LED's to PORTC
+out DDRC,temp		    ;PORTC is output
+out PORTF,temp		    ;Enable pull-up resistor on portA
 clr temp
-out DDRF,temp				;PORTA is input
+out DDRF,temp		    ;PORTF is input
 clr zeroL                   ;Setting low to 0
 clr zeroH                   ;Setting high to 0
 
 PressA: 
-	sbic PINF,0				;Skip next intruction if A pressed 
-	rjmp PressB
+    sbic PINF,0		    ;Skip next intruction if A pressed 
+    rjmp PressB
     rcall Delay
     cpi temp,0b0000         ;Checking if the LED's are all OFF
     breq Reset1             ;If they are, reset all LED's to ON
