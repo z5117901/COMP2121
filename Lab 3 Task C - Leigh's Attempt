@@ -1,0 +1,108 @@
+;Lab 3 Task C.asm
+;Author: Leigh Huang	
+;Date: 15/9/2017 
+
+.include "m2560def.inc"
+
+.dseg
+.def seconds=r16
+.def minutes=r17
+.def output=r22
+//.def MinStart=r22
+.def zero=r18
+.def time0=r19
+.def time1=r20
+.def time2=r21
+
+
+.equ Initial = 0b1000000
+
+.cseg 
+
+clr zero
+out PORTC,zero
+ser zero
+out DDRC,zero
+clr zero
+ldi MinStart,Initial
+clr minutes
+
+Secnd:
+	rcall delay1s
+	cpi seconds,0b111100 		;Comparing to 60 in binary
+	//breq ResetSeconds
+	breq Mins
+	inc seconds
+	out PORTC,seconds
+	rjmp Secnd
+
+Mins:
+	//cpi minutes,0b00000000
+	//breq MinuteStart
+	//add minutes,MinStart
+	add seconds,MinStart
+	//out PORTC,minutes 
+	out PORTC,seconds
+	rjmp Secnd
+
+ResetSeconds:
+	ldi seconds,0b000000
+	out PORTC, seconds
+	rjmp Mins
+	
+MinuteStart:
+	ldi minutes,Initial
+	out PORTC,minutes
+	rjmp Secnd
+	
+delay1s:
+	ldi time2, 100
+delay2:
+	ldi time1, 200
+delay1:
+	ldi time0, 199
+delay0:
+	nop
+	dec time0
+	brne delay0
+	nop
+	dec time1
+	brne delay1
+	dec time2
+	brne delay2
+ret
+
+
+//.def delayL=r24
+//.def delayH=r25
+//.def counterL=r26
+//.def counterH=r27
+/*Delay1: 
+	push delayL
+	push delayH
+	ldi delayL,low(65535)
+	ldi delayH,high(65535)
+	
+	loopdelay1:
+		sbiw delayH:delayL,1
+		cp delayL,zero
+		cpc delayH,zero
+		brne loopdelay1
+	pop delayH
+	pop delayL
+	ret
+	
+Delay0:
+	push counterL
+	push counterH
+	ldi counterL,low(5000)
+	ldi counterH,high(5000)
+	
+	loopdelay0: 
+		sbiw counterH:counterL,1
+		cp counterL,zero
+		cpc counterH,zero
+		brne loopdelay0
+	pop counterH
+	pop	counterL
+	ret*/
