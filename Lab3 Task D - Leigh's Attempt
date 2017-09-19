@@ -1,0 +1,126 @@
+;
+; Lab 3 Task D.asm
+;
+; Created: 20/09/2017 12:52:42 AM
+; Author : Leigh
+;
+
+.include "m2560def.inc"
+
+.def temp=r16
+.def leds=r17  
+.def second=r18
+.def minutes=r19
+
+.equ onemin=0b111100	;Define a pattern for 1 minute
+
+;The macro clears a word (2bytes) in data memory 
+;The parameter @0 is the mmeory address for that word
+.macro clear
+	ldi YL, low(@0)		;load the memory address to Y pointer
+	ldi YH, high(@0)
+	clr temp			;set temp to 0
+	st Y+,temp			;clear the two bytes at @0 in SRAM
+	st Y,temp
+.endmacro
+
+.dseg
+.org 0x200
+SecondCounter: .byte 2	;Two-byte counter for counting seconds
+TempCounter: .byte 2	;Temporary counter used to determine if one second has passed
+
+.cseg
+.org 0x0000				;By default it is 0 in code segment
+	jmp RESET
+	;jmp DEFAULT;NO HANDLING FOR IRQ0
+	;jmp DEFAULT;NO ...			IRQ1   CAN I IGNORE???
+.org OVF0addr			;OVF0addr is the address of Timer0 Overflow Interrupt Vector
+	jmp Timer0OVF		;jump to the interrupt handler for Timer0 overflow
+
+;jmp DEFAULT
+;DEFAULT: reti
+
+RESET:
+
+	ldi temp, high(RAMEND)	;Initialise the stack pointer
+	out SPH,temp
+	ldi temp, low(RAMEND)
+	out SPL,temp
+	clr minutes
+	clr second
+	ser temp
+	out DDRC,temp			;Port C is output
+	clr leds
+	out PORTC,leds			;Initially set led's all to 0 "off"
+	rjmp main
+
+Timer0OVF:					;Interrupt subroutine to Timer0
+	push temp
+	in temp,SREG
+	push temp
+	push YH
+	push YL
+	push r25
+	push r24
+
+	lds r24,TempCounter
+	lds r25,TempCounter+1
+	adiw r25:r24,1
+
+	cpi r24,low(7812)
+	ldi temp,high(7812)
+	cpc r25,temp
+	brne NotSecond
+
+	inc second
+	cpi second,onemin
+	breq minu
+	inc leds	
+;	lds r24,SecondCounter
+;	lds r25,SecondCounter+1
+;	adiw r25:r24,1
+;	sts SecondCounter,r24
+;	sts SecondCounter+1,r25
+	back:
+	out PORTC,leds
+	clear TempCounter
+	rjmp EndIf
+
+minu:
+	clr leds 
+	clr second
+	ldi temp,0b1000000
+	add minutes,temp     ;1
+	clr temp
+	mov leds,minutes
+	rjmp back
+
+NotSecond:
+	sts TempCounter,r24
+	sts TempCounter+1,r25
+	rjmp EndIf
+
+	
+EndIf:
+	pop r24
+	pop r25
+	pop YL
+	pop YH
+	pop temp
+	out SREG,temp
+	pop temp
+	reti
+
+main:
+
+	clear TempCounter
+	;clear SecondCounter
+	ldi temp,0
+	out TCCR0A,temp
+	ldi temp,0b00000010
+	out TCCR0B,temp
+	ldi temp, 1<<TOIE0
+	sts TIMSK0,temp
+	sei
+
+loop:rjmp loop
