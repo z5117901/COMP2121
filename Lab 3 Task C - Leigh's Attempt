@@ -1,3 +1,102 @@
+------------------------FINAL REV-------------------------------
+;Lab 3 Task C.asm
+;Author: Leigh Huang	
+;Date: 15/9/2017 
+
+.include "m2560def.inc"
+
+.dseg
+.def seconds=r16
+.def minutes=r17
+.def zero=r18
+.def time0=r19
+.def time1=r20
+.def time2=r21
+.def minstart=r22
+
+
+.equ Initial = 0b1000000
+
+.cseg 
+
+clr zero
+out PORTC,zero
+ser zero
+out DDRC,zero
+clr zero
+ldi minstart,Initial
+clr minutes
+
+Secnd:
+	rcall delay1s
+	cpi seconds,0b111100 		;Comparing to 60 in binary
+	breq Mins
+	inc seconds
+	out PORTC,seconds
+	rjmp Secnd
+
+
+Mins:
+	mov minutes,minstart
+	
+Mins0:
+	rcall delay1s 
+	cpi minutes,0b1111100
+	breq Mins1
+	inc minutes
+	out PORTC,minutes
+	rjmp Mins0
+
+Mins1:
+	ldi minutes,0b10000000
+
+Mins2:
+	rcall delay1s 
+	cpi minutes,0b10111100
+	breq Mins3
+	inc minutes
+	out PORTC,minutes
+	rjmp Mins2
+
+Mins3:
+	ldi minutes,0b11000000
+
+Mins4:
+	rcall delay1s 
+	cpi minutes, 0b11111100
+	breq Mins5
+	inc minutes
+	out PORTC,minutes
+	rjmp Mins4
+
+Mins5:
+	clr seconds
+	clr minutes
+	rjmp Secnd
+
+;One Second Delay Function
+/*4clocks *199 = 796
+4 clocks in the next loop (796+4)*200 = 160000
+3 clocks int the next loop (160000+3)*100= = 16000300*/
+delay1s:
+	ldi time2, 10;0
+delay2:
+	ldi time1, 200
+delay1:
+	ldi time0, 199
+delay0:
+	nop
+	dec time0
+	brne delay0
+	nop
+	dec time1
+	brne delay1
+	dec time2
+	brne delay2
+ret
+
+-----------------------IGNORE THE STUFF BELOW--------------------
+
 ;Lab 3 Task C.asm
 ;Author: Leigh Huang	
 ;Date: 15/9/2017 
