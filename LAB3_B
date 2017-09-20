@@ -1,0 +1,118 @@
+.include "m2560def.inc"
+
+
+.dseg
+.def temp =r16
+.def time0=r17
+.def time1=r18
+.def time2=r19
+.def flag=r20
+.equ HIGH_LEDS = 0b11110000
+.equ LOW_LEDS = 0b00001111
+PATTERN: .byte 1
+
+.cseg
+.org 0x0
+jmp RESET
+.org INT0addr ; INT0addr is the address of EXT_INT0
+jmp EXT_INT0
+.org INT1addr ; INT1addr is the address of EXT_INT1
+jmp EXT_INT1
+
+RESET:
+	
+	ldi temp, 0b00001111
+	sts PATTERN, temp
+	ldi temp, low(RAMEND)
+	out SPL, temp
+	ldi temp, high(RAMEND)
+	out SPH, temp
+	ser temp
+	out DDRC, temp
+	clr temp
+	out PORTC, temp
+	out DDRD, temp
+	out PORTD, temp
+	ldi temp, (2 << ISC10) | (2 << ISC00)
+	sts EICRA, temp
+	in temp, EIMSK
+	ori temp, (1<<INT0) | (1<<INT1)
+	out EIMSK, temp
+	sei
+	jmp main
+
+EXT_INT0:
+
+	cpi flag, 1 ;skips delay if flag is set
+	brne br1
+	rcall delay1s
+	br1:
+	ldi flag, 1 ;sets flag
+
+
+	push temp
+	in temp, SREG
+	push temp
+	lds temp, PATTERN
+	lsl temp
+	inc temp
+	cpi temp, 0b00011111
+	brne notequal1
+	ldi temp, 0b00000000
+	notequal1:
+	sts PATTERN,temp
+	out PORTC, temp
+	pop temp
+	out SREG, temp
+	pop temp
+	reti
+
+EXT_INT1:
+
+	cpi flag, 1 ;skips delay if flag is set
+	brne br2
+	rcall delay1s
+	br2:
+	ldi flag, 1 ;sets flag
+
+
+	push temp
+	in temp, SREG
+	push temp
+	lds temp, PATTERN
+	cpi temp, 0b00000000
+	brne notequal2
+	ldi temp, 0b00001111
+	rjmp skip
+	notequal2:
+	lsr temp
+	skip:
+	sts PATTERN,temp
+	out PORTC, temp
+	pop temp
+	out SREG, temp
+	pop temp
+	reti
+main: ; main - does nothing but increment a counter
+	clr temp
+	loop:
+	inc temp
+	rjmp loop
+
+delay1s:
+	ldi time2, 100
+delay2:
+	ldi time1, 200
+delay1:
+	ldi time0, 199
+delay0:
+	nop
+	dec time0
+	brne delay0
+	nop
+	dec time1
+	;brne delay1
+	dec time2
+	brne delay2
+	clr flag ; sets flag to 0
+ret
