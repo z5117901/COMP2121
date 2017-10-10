@@ -1,0 +1,586 @@
+/*
+ * taskB.asm
+ *
+ *  Created: 2017/9/27 11:43:27
+ *   Author: biglo
+ */ 
+ ;IMPORTANT NOTICE: 
+;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ¡­, 7).  
+
+;Board settings: 
+;Connect the four columns C0~C3 of the keypad to PL3~PL0 of PORTL and the four rows R0~R3 to PL7~PL4 of PORTL.
+;Connect LED0~LED7 of LEDs to PC0~PC7 of PORTC.
+    
+; For I/O registers located in extended I/O map, "IN", "OUT", "SBIS", "SBIC", 
+; "CBI", and "SBI" instructions must be replaced with instructions that allow access to 
+; extended I/O. Typically "LDS" and "STS" combined with "SBRS", "SBRC", "SBR", and "CBR".
+
+.include "m2560def.inc"
+.macro load_results
+	lds @0,Results
+	lds @1,Results+1
+
+.endmacro
+.macro store_results
+	sts  Results,@0
+	sts  Results+1,@1
+
+.endmacro
+.macro do_lcd_command
+	ldi r16, @0
+	rcall lcd_command
+	rcall lcd_wait
+.endmacro
+.macro do_lcd_data
+	mov pat, @0
+	rcall lcd_data
+	rcall lcd_wait
+.endmacro
+.macro clear
+	ldi YL, low(@0)
+	ldi YH, high(@0)
+	clr temp
+	st Y+, temp
+	st Y, temp
+.endmacro
+
+.equ LCD_RS = 7
+.equ LCD_E = 6
+.equ LCD_RW = 5
+.equ LCD_BE = 4
+
+.macro lcd_set
+	sbi PORTA, @0
+.endmacro
+.macro lcd_clr
+	cbi PORTA, @0
+.endmacro
+
+
+.def rstNum0=r7
+.def rstNum1=r8
+.def temp =r16
+.def row =r17
+.def col =r18
+.def mask =r19
+.def temp2 =r20
+.def count=r21
+.def pat=r22
+.def currNum0=r23
+.def currNum1=r24
+.equ PORTLDIR = 0xF0
+.equ INITCOLMASK = 0xEF
+.equ INITROWMASK = 0x01
+.equ ROWMASK = 0x0F
+.dseg
+DeCo: .byte 2
+Cout: .byte 1
+Results: .byte 2
+Digits: .byte 5
+.cseg
+jmp RESET
+
+.org 0x72
+RESET:
+
+ldi temp, low(RAMEND)
+out SPL, temp
+ldi temp, high(RAMEND)
+out SPH, temp
+ldi temp, PORTLDIR ; columns are outputs, rows are inputs
+STS DDRL, temp     ; cannot use out
+	ser r16
+	out DDRF, r16
+	out DDRA, r16
+	out DDRC,r16
+	clear Results
+	clr r16
+	out PORTF, r16
+	out PORTA, r16
+	out PORTC,r16
+	
+	do_lcd_command 0b00110000 ; 1x5x7; 0b001 DL N F x x;function set
+	rcall sleep_5ms
+	do_lcd_command 0b00110000 ; 1x5x7
+	rcall sleep_1ms
+	do_lcd_command 0b00110000 ; 1x5x7
+	do_lcd_command 0b00110000 ; 1x5x7
+	do_lcd_command 0b00001000 ; display off?
+	do_lcd_command 0b00000001 ; clear display
+	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
+	do_lcd_command 0b00001110 ; dispaly on, Cursor on, no blink
+	clr currNum0
+	clr currNum1
+	clr r30
+	clr r3
+	clr rstNum0
+	clr rstNum1
+	
+	clear Deco
+	;ldi zl,low(Results)
+	;ldi zh,high(Results)
+; main keeps scanning the keypad to find which key is pressed.
+main:
+ldi mask, INITCOLMASK ; initial column mask
+clr col ; initial column
+colloop:
+STS PORTL, mask ; set column to mask value
+; (sets column 0 off)
+ldi temp, 0xFF ; implement a delay so the
+; hardware can stabilize
+delay:
+dec temp
+brne delay
+LDS temp, PINL ; read PORTL. Cannot use in 
+andi temp, ROWMASK ; read only the row bits
+cpi temp, 0xF ; check if any rows are grounded
+breq nextcol ; if not go to the next column
+ldi mask, INITROWMASK ; initialise row check
+clr row ; initial row
+rowloop:      
+	mov temp2, temp
+	and temp2, mask ; check masked bit
+	brne skipconv ; if the result is non-zero,
+	; we need to look again
+	rjmp delay0;;;;debounce
+b0:
+	lds temp,Cout
+	inc temp
+	sts Cout,temp
+	rcall convert ; if bit is clear, convert the bitcode
+	jmp main ; and start again
+skipconv:
+	inc row ; else move to the next row
+	lsl mask ; shift the mask to the next bit
+	jmp rowloop          
+nextcol:     
+	cpi col, 3 ; check if we^Òre on the last column
+	breq main ; if so, no buttons were pushed,
+		; so start again.
+	sec ; else shift the column mask:
+	; We must set the carry bit
+	rol mask ; and then rotate left by a bit,
+	; shifting the carry into
+	; bit zero. We need this to make
+	; sure all the rows have
+	; pull-up resistors
+	inc col ; increment column value
+	jmp colloop ; and check the next column
+	; convert function converts the row and column given to a
+	; binary number and also outputs the value to PORTC.
+	; Inputs come from registers row and col and output is in
+	; temp.
+te:
+	jmp symbols
+convert:
+	cpi col, 3 ; if column is 3 we have a letter
+	breq letters
+	cpi row, 3 ; if row is 3 we have a symbol or 0
+	breq te 
+	mov pat, row ; otherwise we have a number (1-9)
+	lsl pat ; temp = row * 2
+	add pat, row ; temp = row * 3
+	add pat, col ; add the column address
+	; to get the offset from 1
+	inc pat ; add 1. Value of switch is
+	; row*3 + col + 1.
+
+	ldi temp,10
+	mul currNum0,temp
+	mov r11,r0
+	mov r12,r1
+	mul currNum1,temp
+	mov r14,r0
+	clr r13
+	add r13,r11
+	adc r14,r12
+	mov currNum0,r13
+	mov currNum1,r14
+	clr r0
+	add currNum0,pat
+	adc currNum1,r0
+	cpi r30,2
+	breq addd
+	cpi r30,1
+	breq subb
+imback:
+	;out PORTC,currNum0;-------------------------------use led to check currNum
+
+	ldi temp,48
+	add pat,temp
+	jmp convert_end
+setvflag:
+;----------------------------------------im thinking
+addd:
+	ldi temp,low(32767)
+	ldi temp2,high(32767)
+	cp temp,currNum0
+	cpc temp2,currNum1
+	brlo setvflag
+bbb:
+	load_results rstNum0,rstNum1
+	add rstNum0,currNum0
+	adc rstNum1,currNum1
+	;out PORTC,rstNum0
+	store_results rstNum0,rstNum1
+	rjmp imback
+subb:
+	load_results rstNum0,rstNum1
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
+	store_results rstNum0,rstNum1
+	rjmp imback
+
+letters:
+	setflag:
+	ldi temp,1	
+	;mov r3,temp;set flag for first time
+
+cpi row,0
+brne plus
+ldi r30,1
+clr currNum0
+clr currNum1
+ldi pat, 45;; -
+jmp coend
+plus:
+ldi r30,2
+cpi row,1
+brne equal
+clr currNum0
+clr currNum1
+ldi pat,43;;+
+jmp coend
+
+equal:
+clr currNum0
+clr currNum1
+cpi row,2
+brne coend
+
+ldi pat,61
+
+coend:
+jmp convert_end
+
+symbols:
+cpi col, 0 ; check if we have a star
+breq star
+cpi col, 1 ; or if we have zero
+breq zero
+ldi pat, 35; we'll output for hash
+jmp convert_end
+
+star:
+ldi pat, 42 ; we'll output  for star
+jmp convert_end
+
+zero:
+	ldi temp,10
+	mul currNum0,temp
+	mov r11,r0
+	mov r12,r1
+	mul currNum1,temp
+	mov r14,r0
+	clr r13
+	add r13,r11
+	adc r14,r12
+	mov currNum0,r13
+	mov currNum1,r14
+	;out PORTC,currNum0;-------------------------------use led to check currNum 
+ldi pat,48 ; set to zero
+
+
+convert_end:
+lds temp2,Cout
+cpi temp2,17
+brne bc
+	do_lcd_command 0b00000001     ;;;why i cant use register to store counter???
+	clear Cout
+bc:
+	do_lcd_data pat; write value to LCD
+;clr temp
+cpi pat,61
+breq showresult
+ret ; return to caller
+
+showresult:
+
+	rjmp wan
+	showdigit:
+	clr currNum0
+	clr currNum1
+
+	ldi temp,48
+	lds r11,digits+4
+	lds r10,digits+3
+	lds r9,digits+2
+	lds r8,digits+1
+	lds r7,digits
+	cp r11,currNum0
+	brne s0
+	cp r10,currNum0
+	brne s1
+	cp r9,currNum0
+	brne s2
+	cp r8,currNum0
+	brne s3
+	jmp s4
+	s0:
+	add r11,temp
+	do_lcd_data r11
+	s1:
+	add r10,temp
+	do_lcd_data r10
+	s2:
+	add r9,temp
+	do_lcd_data r9
+	s3:
+	add r8,temp
+	do_lcd_data r8
+	s4:
+	add r7,temp
+	do_lcd_data r7
+	clr r25
+	clear Results
+	ret
+b1:
+clr r26
+clr r27
+ rjmp b0
+doubleloop0:
+	inc count
+	cpi count, 1
+	breq b1
+delay0:
+	lds r26,DeCo
+	lds r27,DeCo+1
+	adiw r27:r26,1
+
+	cpi r26, low(1222)
+	ldi temp,high(1222)
+	cpc temp,r27
+	brne niceloop0
+
+	clr r26
+	clr r27
+	clr temp
+	clear DeCo
+	rjmp doubleloop0
+niceloop0:
+	sts Deco,r26 
+	sts Deco+1,r27
+	rjmp delay0
+
+lcd_command:
+	out PORTF, r16
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_E
+	nop
+	nop
+	nop
+	ret
+
+lcd_data:
+	out PORTF, pat
+	lcd_set LCD_RS
+	nop
+	nop
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_RS
+	ret
+
+lcd_wait:
+	push r16
+	clr r16
+	out DDRF, r16
+	out PORTF, r16
+	lcd_set LCD_RW
+lcd_wait_loop:
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+        nop
+	in r16, PINF
+	lcd_clr LCD_E
+	sbrc r16, 7
+	rjmp lcd_wait_loop
+	lcd_clr LCD_RW
+	ser r16
+	out DDRF, r16
+	pop r16
+	ret
+
+.equ F_CPU = 16000000
+.equ DELAY_1MS = F_CPU / 4 / 1000 - 4;;;;;i dont understand
+; 4 cycles per iteration - setup/call-return overhead
+
+sleep_1ms:
+	push r24
+	push r25
+	ldi r25, high(DELAY_1MS)
+	ldi r24, low(DELAY_1MS)
+delayloop_1ms:
+	sbiw r25:r24, 1
+	brne delayloop_1ms
+	pop r25
+	pop r24
+	ret
+
+sleep_5ms:
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	ret
+
+overflow1:
+	rjmp overflow
+wan:
+	
+	clr r30
+load_results rstNum0,rstNum1
+	brvs overflow1
+	ldi temp,0b10000000
+	cpc rstNum1,temp
+	brsh ones
+	rjmp conti
+	ones:
+
+	com rstNum0
+	com rstNum1
+	ldi temp,1
+	add rstNum0,temp
+	clr r0
+	adc rstNum1,r0
+	ldi temp,45
+	do_lcd_data temp
+conti:
+ldi currNum0,low(10000)
+ldi currNum1,high(10000)
+
+cp rstNum0,currNum0
+cpc rstNum1,currNum1
+
+brlt qian
+lds temp,digits+4
+inc temp
+sts digits+4,temp
+sub rstNum0,currNum0
+sbc rstNum1,currNum1
+
+rjmp wan
+qian:
+ldi currNum0,low(1000)
+ldi currNum1,high(1000)
+
+cp rstNum0,currNum0
+cpc rstNum1,currNum1
+
+brlt bai
+lds temp,digits+3
+inc temp
+sts digits+3,temp
+sub rstNum0,currNum0
+sbc rstNum1,currNum1
+
+rjmp qian
+bai:
+ldi currNum0,low(100)
+ldi currNum1,high(100)
+
+cp rstNum0,currNum0
+cpc rstNum1,currNum1
+
+brlt shi
+lds temp,digits+2
+inc temp
+sts digits+2,temp
+sub rstNum0,currNum0
+sbc rstNum1,currNum1
+
+rjmp bai
+shi:
+ldi currNum0,low(10)
+ldi currNum1,high(10)
+cp rstNum0,currNum0
+cpc rstNum1,currNum1
+
+brlt ge
+lds temp,digits+1
+inc temp
+sts digits+1,temp
+sub rstNum0,currNum0
+sbc rstNum1,currNum1
+
+rjmp shi
+ge:
+
+ldi currNum0,low(1)
+ldi currNum1,high(1)
+
+cp rstNum0,currNum0
+cpc rstNum1,currNum1
+
+brlt endge
+lds temp,digits
+inc temp
+sts digits,temp
+sub rstNum0,currNum0
+sbc rstNum1,currNum1
+
+rjmp ge
+
+endge:
+
+rjmp showdigit
+
+
+overflow:
+	ldi temp,79
+	do_lcd_data temp
+	ldi temp,118
+	do_lcd_data temp
+	ldi temp,101
+	do_lcd_data temp
+	ldi temp,114
+	do_lcd_data temp
+	ldi temp,102
+	do_lcd_data temp
+	ldi temp,108
+	do_lcd_data temp
+	ldi temp,111
+	do_lcd_data temp
+	ldi temp,119
+	do_lcd_data temp
+	ldi temp,32
+	do_lcd_data temp
+	ldi temp,79
+	do_lcd_data temp
+	ldi temp,99
+	do_lcd_data temp
+	ldi temp,99
+	do_lcd_data temp
+	ldi temp,117
+	do_lcd_data temp
+	ldi temp,114
+	do_lcd_data temp
+	ldi temp,101
+	do_lcd_data temp
+	ldi temp,100
+	do_lcd_data temp
+endd:rjmp endd
