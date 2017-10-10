@@ -1,0 +1,88 @@
+.include "m2560def.inc" 
+
+;unsigned integer 325658 needs 3 bytes to store
+.def byte_1=r7		;Low byte to store
+.def byte_2=r8		;Mid byte to store
+.def byte_3=r9		;High byte to store
+
+.def i=r25	;Counter in the for loop
+.def ten=r26
+
+.dseg
+.org 0x100
+	Data: .byte 4	; Reserves 4 byte spaces for "Data" 
+
+.cseg
+.org 0x000
+	s: .db"325658"	;Directive
+
+ldi zl,low(s<<1)	;Load z-pointer and make it pointer to the first constant of "s"
+ldi zh,high(s<<1)	
+
+ldi yl,low(Data)
+ldi yh,high(Data)
+
+ldi ten, 10
+clr byte_1
+clr byte_2
+clr byte_3
+clr i
+
+main: 
+	for:
+		clr r21
+		clr r22
+		clr r23nm
+		lpm r20, z+	;Load 1 byte pointed to by Z register to destination register
+		rjmp mult
+
+		mult:
+			mul byte_1, ten
+			mov r11,r0
+			mov r12,r1
+			;The multiplication is default stored in r0, r1. Thus move the pair to another register
+		
+			mul byte_2, ten
+			mov r18,r0
+			mov r19,r1
+
+			clr r13
+			clr r17
+			add r17,r11
+			adc r18,r12
+			adc r19,r13
+
+			mul byte_3,ten
+			mov r13,r0
+			mov r14,r1
+
+			clr r12
+			clr r13
+			add r12,r17
+			adc r13,r18
+			adc r14,r19
+			clr r24
+			adc r15,r24
+			rjmp subt
+
+		subt:
+			subi r20,'0'	;r20 holds 
+			add r20,r12
+			adc r21,r13
+			adc r22,r14
+			adc r23,r15
+			mov byte_1,r20
+			mov byte_2,r21
+			mov byte_3,r22
+			inc i
+			cpi i,5
+			brlo for
+			breq for
+			rjmp store
+		store:
+			st y+,byte_1
+			st y+,byte_2
+			st y+,byte_3
+			rjmp end
+end:
+	rjmp end
