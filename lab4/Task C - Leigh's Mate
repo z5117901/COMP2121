@@ -1,0 +1,367 @@
+/*
+ * PartC.asm
+ *
+ *  Created: 6/05/2017 2:36:35 PM
+ *   Author: Mark
+ */ 
+
+ .include "m2560def.inc"
+
+.def row = r16 ; current row number
+.def col = r17 ; current column number
+.def rmask = r18 ; mask for current row during scan
+.def cmask = r19 ; mask for current column during scan
+.def temp1 = r20
+.def temp2 = r21
+.def displayTotal = r22
+.def inputTotal = r23
+.def debounceFlag = r24
+.equ PORTLDIR =		0b11110000 ; PL7-4: output, PL3-0, input
+.equ INITCOLMASK =	0b11101111 ; scan from the rightmost column,
+.equ INITROWMASK =	0b00000001 ; scan from the top row
+.equ ROWMASK =		0b00001111 ; for obtaining input from Port D
+.equ LCD_RS = 7
+.equ LCD_E = 6
+.equ LCD_RW = 5
+.equ LCD_BE = 4
+
+
+
+
+.macro do_lcd_command	; calls the lcd_command function followed by lcd_wait
+	ldi r16, @0
+	rcall lcd_command
+	rcall lcd_wait
+.endmacro
+
+.macro do_lcd_data	; calls the lcd_data function followed by lcd_wait
+	ldi r16, @0
+	rcall lcd_data
+	rcall lcd_wait
+.endmacro
+
+.macro do_lcd_data_register	; takes a register as an operand
+	mov r16, @0
+	subi r16, -'0'	; add '0' to the register value so it'll display the right character
+
+	rcall lcd_data
+	rcall lcd_wait
+.endmacro
+
+.macro lcd_set
+	sbi PORTA, @0
+.endmacro
+
+.macro lcd_clr
+	cbi PORTA, @0
+.endmacro
+
+.org 0	; the interrupt vector for RESET?
+	jmp RESET
+
+
+RESET:
+	ldi r16, low(RAMEND)	; initialising stack pointer
+	out SPL, r16
+	ldi r16, high(RAMEND)
+	out SPH, r16
+
+	ser r16
+	out DDRF, r16	; setting ports F and A as output ports
+	out DDRA, r16
+	clr r16
+	out PORTF, r16	; outputting 0 to ports F and A
+	out PORTA, r16
+	clr displayTotal
+	clr inputTotal
+
+	ldi temp1, PORTLDIR ; PL7:4/PL3:0, out/in
+	sts DDRL, temp1
+	ser temp1 ; PORTC is output
+	out DDRC, temp1
+	clr temp1
+
+	; setting up the lcd display
+	do_lcd_command 0b00111000 ; 2x5x7
+	rcall sleep_5ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	rcall sleep_1ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00001000 ; display off?
+	do_lcd_command 0b00000001 ; clear display
+	do_lcd_command 0b00000110 ; increment, no display shift
+	do_lcd_command 0b00001100 ; Cursor off, no blink
+	do_lcd_data '0'
+	do_lcd_command 0b11000000	; go to second line
+
+	jmp main
+
+
+
+
+;
+; Send a command to the LCD (r16)
+;
+lcd_command:
+	out PORTF, r16	; outputs the operand to port F
+	rcall sleep_1ms
+	lcd_set LCD_E	; sets bit 6 in port A
+	rcall sleep_1ms
+	lcd_clr LCD_E	; clears bit 6 in port A
+	rcall sleep_1ms
+	ret
+
+lcd_data:
+	out PORTF, r16	; outputs the operand to port F
+	lcd_set LCD_RS	; sets bit 7 in port A
+	rcall sleep_1ms
+	lcd_set LCD_E	; set bit 6 in port A
+	rcall sleep_1ms
+	lcd_clr LCD_E	; clears bit 6 in port A
+	rcall sleep_1ms
+	lcd_clr LCD_RS	; clears bit 7 in port A
+	ret
+
+lcd_wait:
+	push r16
+	clr r16
+	out DDRF, r16	; make port F an input port
+	out PORTF, r16	; ??
+	lcd_set LCD_RW	; set bit 5 in port A
+lcd_wait_loop:
+	rcall sleep_1ms
+	lcd_set LCD_E	; set bit 6 in port A
+	rcall sleep_1ms
+	in r16, PINF	; read pin F
+	lcd_clr LCD_E	; clear bit 6 in port A
+
+	sbrc r16, 7		; if bit 7 of r16 is clear, then skip the jump to lcd_wait_loop
+	rjmp lcd_wait_loop
+
+	lcd_clr LCD_RW	; clear bit 5 in port A
+	ser r16
+	out DDRF, r16	; set port F as an output port
+	pop r16
+	ret
+
+.equ F_CPU = 16000000	; 16MHz
+.equ DELAY_1MS = F_CPU / 4 / 1000 - 4
+; 4 cycles per iteration - setup/call-return overhead
+
+sleep_1ms:
+	push r24
+	push r25
+	ldi r25, high(DELAY_1MS)
+	ldi r24, low(DELAY_1MS)
+delayloop_1ms:
+	sbiw r25:r24, 1
+	brne delayloop_1ms
+	pop r25
+	pop r24
+	ret
+
+sleep_5ms:
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	ret
+
+sleep_100ms:
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	rcall sleep_5ms
+	ret
+	
+allowInput:
+	ldi debounceFlag, 0
+	rjmp main
+
+main:
+	ldi cmask, INITCOLMASK ; initial column mask 0b11101111
+	clr col ; initial column 0
+
+
+colloop:
+	cpi col, 4 ; if 4 then each column has been checked
+	breq allowInput ; If all keys are scanned, reset the debounceFlag, then repeat.
+	sts PORTL, cmask ; Otherwise, scan a column.
+	ldi temp1, 0xFF ; Slow down the scan operation.
+
+delay: dec temp1
+	brne delay
+
+	lds temp1, PINL ; Read PORTL
+	andi temp1, ROWMASK ; To check if any row is low, and temp1 with ROWMASK = 0b00001111
+	cpi temp1, ROWMASK 
+	breq nextcol ; if temp1 still equal to ROWMASK, then none of the rows are low and no button has been pressed, so move on to next column
+		
+	sbrc debounceFlag, 0
+	rjmp main
+	; else, we know a row is low, so we need to check the rows now to determine which one it is.
+	ldi rmask, INITROWMASK ; Initialize for row check, INITROWMASK = 0b00000001 
+	clr row ; 
+
+rowloop:
+	cpi row, 4
+	breq nextcol ; the row scan is over.
+	mov temp2, temp1
+	and temp2, rmask ; check the current row bit to see if it's set
+	breq convert ; if the and resulted in an equal, then the current row is set, so branch to convert
+	inc row ; else move to the next row
+	lsl rmask ; move the mask along
+	jmp rowloop
+
+nextcol: ; if row scan is over or no rows were low
+	lsl cmask ; don't need to increment cmask because it's initialised as 0b11101111
+	inc col ; increase column value
+	jmp colloop ; go to the next column
+symbols:
+	jmp symbolsReal
+convert:
+	cpi col, 3 ; If the pressed key is in col.3
+	breq letters ; we have a letter, so we're doing something yay
+
+	cpi row, 3 ; If the key is in row3,
+	breq symbols ; we have a symbol or 0
+
+	mov temp1, row ; Otherwise we have a number in 1-9
+	lsl temp1
+	add temp1, row
+	add temp1, col ; temp1 = row*3 + col
+	subi temp1, -1 ; Adding 1, we now have the value
+	jmp numbers
+letters:
+	cpi row, 0	; if the A button has been pressed
+	breq addition
+	cpi row, 1	; if the B button has been pressed
+	breq subtraction
+	cpi row, 2
+	breq multiplication	; if the C button has been pressed
+	cpi row, 3
+	jmp division	; the D button must have been pressed
+addition:
+	add displayTotal, inputTotal
+	rjmp newDisplayTotal
+subtraction:
+	sub displayTotal, inputTotal
+	rjmp newDisplayTotal
+multiplication:
+
+	mul inputTotal, displayTotal
+	rcall sleep_100ms	; mul is super slow
+	mov displayTotal, r0
+	rjmp newDisplayTotal
+mainJump:
+	jmp main
+division:
+	cpi inputTotal, 0
+	breq mainJump	; don't even think about dividing by zero
+	clr temp1
+divLoop:
+	cp displayTotal, inputTotal
+	brlo endDivLoop
+	inc temp1
+	sub displayTotal, inputTotal
+	rjmp divLoop
+endDivLoop:
+	mov displayTotal, temp1
+	rjmp newDisplayTotal
+
+newDisplayTotal:
+	do_lcd_command 0b00000001 ; clears the LCD display
+	mov inputTotal, displayTotal
+	clr temp1
+	cpi inputTotal, 100
+	brlo skipDivision100
+dividingBy100:
+	subi inputTotal, 100
+	inc temp1
+	cpi inputTotal, 100
+	brsh dividingBy100
+	do_lcd_data_register temp1
+skipDivision100:
+	cpi temp1, 1
+	brsh skip1
+	do_lcd_data_register temp1
+skip1:
+	clr temp1
+	cpi inputTotal, 10
+	brlo skipDivision10
+dividingBy10:
+	subi inputTotal, 10
+	inc temp1
+	cpi inputTotal, 10
+	brsh dividingBy10
+	do_lcd_data_register temp1
+skipDivision10:
+	cpi temp1, 1
+	brsh skip2
+	do_lcd_data_register temp1
+skip2:
+	clr temp1
+	cpi inputTotal, 1
+	brlo skipDivision1
+dividingBy1:
+	subi inputTotal, 1
+	inc temp1
+	cpi inputTotal, 1
+	brsh dividingBy1
+	do_lcd_data_register temp1
+skipDivision1:
+	cpi temp1, 1
+	brsh skip3
+	do_lcd_data_register temp1
+skip3:
+	clr temp1
+	clr inputTotal
+	do_lcd_command 0b11000000	; go to second line
+	jmp main
+symbolsReal:
+	cpi col, 1 ; check if we have zero
+	breq zero
+	cpi col, 0 ; check if we have *
+	breq star
+	jmp main ; if not zero or * then we don't care, go back to main
+star:
+	do_lcd_command 0b00000001 ; clears the LCD display
+	do_lcd_data '0' ; display
+	do_lcd_command 0b11000000	; go to second line
+	clr displayTotal		; clear the totals
+	clr inputTotal
+	rjmp main
+zero:
+	ldi temp1, 0 ; Set to zero
+numbers:
+	mov col, inputTotal ; just using col as a placeholder here, it won't be used until it's reset again anyway
+	lsl inputTotal
+	lsl inputTotal
+	lsl inputTotal
+	add inputTotal, col
+	add inputTotal, col
+	add inputTotal, temp1	; add the entered number to the input total
+
+	do_lcd_data_register temp1
+	rcall sleep_100ms
+	ldi debounceFlag, 1
+
+	jmp main ; Restart main loop
