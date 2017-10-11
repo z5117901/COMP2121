@@ -8,11 +8,22 @@
 .include "m2560def.inc"
 
 
+.equ LCD_RS = 7
+.equ LCD_E = 6
+.equ LCD_RW = 5
+.equ LCD_BE = 4
+.def temp=r16
+.def minutes=r19
+.def s=r18 ;seconds
+.def ts=r17 ;10's seconds
+.equ onemin=0b111100
+;macros
 .macro do_lcd_command
 	ldi r16, @0
 	rcall lcd_command
 	rcall lcd_wait
 .endmacro
+
 .macro do_lcd_data
 	mov r20, @0
 	rcall lcd_data
@@ -20,10 +31,6 @@
 .endmacro
 
 
-.equ LCD_RS = 7
-.equ LCD_E = 6
-.equ LCD_RW = 5
-.equ LCD_BE = 4
 
 .macro lcd_set
 	sbi PORTA, @0
@@ -33,11 +40,7 @@
 .endmacro
 
 
-.def temp=r16
-.def minutes=r19
-.def s=r18
-.def ts=r17
-.equ onemin=0b111100
+
 .macro clear
 	ldi YL, low(@0)
 	ldi YH, high(@0)
