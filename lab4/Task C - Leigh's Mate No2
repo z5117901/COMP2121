@@ -73,10 +73,12 @@
 .equ INITROWMASK = 0x01
 .equ ROWMASK = 0x0F
 .dseg
+.org 0x200
 DeCo: .byte 2
 Cout: .byte 1
 Results: .byte 2
 Digits: .byte 5
+incflag: .byte 1
 .cseg
 jmp RESET
 
@@ -99,12 +101,12 @@ STS DDRL, temp     ; cannot use out
 	out PORTA, r16
 	out PORTC,r16
 	
-	do_lcd_command 0b00110000 ; 1x5x7; 0b001 DL N F x x;function set
+	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
 	rcall sleep_5ms
-	do_lcd_command 0b00110000 ; 1x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
 	rcall sleep_1ms
-	do_lcd_command 0b00110000 ; 1x5x7
-	do_lcd_command 0b00110000 ; 1x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
 	do_lcd_command 0b00001000 ; display off?
 	do_lcd_command 0b00000001 ; clear display
 	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
@@ -138,52 +140,51 @@ breq nextcol ; if not go to the next column
 ldi mask, INITROWMASK ; initialise row check
 clr row ; initial row
 rowloop:      
-	mov temp2, temp
-	and temp2, mask ; check masked bit
-	brne skipconv ; if the result is non-zero,
-	; we need to look again
-	rjmp delay0;;;;debounce
+mov temp2, temp
+and temp2, mask ; check masked bit
+brne skipconv ; if the result is non-zero,
+; we need to look again
+rjmp delay0;;;;debounce
 b0:
-	lds temp,Cout
-	inc temp
-	sts Cout,temp
-	rcall convert ; if bit is clear, convert the bitcode
-	jmp main ; and start again
+
+rcall convert ; if bit is clear, convert the bitcode
+jmp main ; and start again
 skipconv:
-	inc row ; else move to the next row
-	lsl mask ; shift the mask to the next bit
-	jmp rowloop          
+inc row ; else move to the next row
+lsl mask ; shift the mask to the next bit
+jmp rowloop          
 nextcol:     
-	cpi col, 3 ; check if we^Òre on the last column
-	breq main ; if so, no buttons were pushed,
-		; so start again.
-	sec ; else shift the column mask:
-	; We must set the carry bit
-	rol mask ; and then rotate left by a bit,
-	; shifting the carry into
-	; bit zero. We need this to make
-	; sure all the rows have
-	; pull-up resistors
-	inc col ; increment column value
-	jmp colloop ; and check the next column
-	; convert function converts the row and column given to a
-	; binary number and also outputs the value to PORTC.
-	; Inputs come from registers row and col and output is in
-	; temp.
+cpi col, 3 ; check if we^Òre on the last column
+breq main ; if so, no buttons were pushed,
+; so start again.
+
+sec ; else shift the column mask:
+; We must set the carry bit
+rol mask ; and then rotate left by a bit,
+; shifting the carry into
+; bit zero. We need this to make
+; sure all the rows have
+; pull-up resistors
+inc col ; increment column value
+jmp colloop ; and check the next column
+; convert function converts the row and column given to a
+; binary number and also outputs the value to PORTC.
+; Inputs come from registers row and col and output is in
+; temp.
 te:
-	jmp symbols
+jmp symbols
 convert:
-	cpi col, 3 ; if column is 3 we have a letter
-	breq letters
-	cpi row, 3 ; if row is 3 we have a symbol or 0
-	breq te 
-	mov pat, row ; otherwise we have a number (1-9)
-	lsl pat ; temp = row * 2
-	add pat, row ; temp = row * 3
-	add pat, col ; add the column address
-	; to get the offset from 1
-	inc pat ; add 1. Value of switch is
-	; row*3 + col + 1.
+cpi col, 3 ; if column is 3 we have a letter
+breq letters
+cpi row, 3 ; if row is 3 we have a symbol or 0
+breq te 
+mov pat, row ; otherwise we have a number (1-9)
+lsl pat ; temp = row * 2
+add pat, row ; temp = row * 3
+add pat, col ; add the column address
+; to get the offset from 1
+inc pat ; add 1. Value of switch is
+; row*3 + col + 1.
 
 	ldi temp,10
 	mul currNum0,temp
@@ -199,79 +200,92 @@ convert:
 	clr r0
 	add currNum0,pat
 	adc currNum1,r0
-	cpi r30,2
-	breq addd
-	cpi r30,1
-	breq subb
-imback:
-	;out PORTC,currNum0;-------------------------------use led to check currNum
 
-	ldi temp,48
-	add pat,temp
-	jmp convert_end
-setvflag:
-;----------------------------------------im thinking
+ldi temp,48
+add pat,temp
+jmp convert_end
+
 addd:
-	ldi temp,low(32767)
-	ldi temp2,high(32767)
-	cp temp,currNum0
-	cpc temp2,currNum1
-	brlo setvflag
-bbb:
 	load_results rstNum0,rstNum1
 	add rstNum0,currNum0
 	adc rstNum1,currNum1
-	;out PORTC,rstNum0
+	brvs over
 	store_results rstNum0,rstNum1
-	rjmp imback
+	cpi r30,0
+	breq backfrom1
+	rjmp backfrom1
 subb:
 	load_results rstNum0,rstNum1
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
+	brvs over
 	store_results rstNum0,rstNum1
-	rjmp imback
+	jmp backfrom1
+
+over: rjmp overflow
 
 letters:
-	setflag:
-	ldi temp,1	
-	;mov r3,temp;set flag for first time
+	ldi temp,low(0x7FFF)
+	ldi temp2,high(0x7FFF)
+	cp currNum0, temp
+	cpc currNum1, temp2
+	brvs over
+	cpi r30,0
+	breq addd
+	cpi r30,1
+	breq subb
+	cpi r30,2
+	breq addd
+	backfrom1:
+	cpi row,0
+	brne plus
+	ldi r30,1;1 stand for minus
 
-cpi row,0
-brne plus
-ldi r30,1
-clr currNum0
-clr currNum1
-ldi pat, 45;; -
-jmp coend
+;rjmp subb
+minusb:
+	clr currNum0
+	clr currNum1
+	ldi pat, 45;; -
+	jmp coend
 plus:
-ldi r30,2
-cpi row,1
-brne equal
-clr currNum0
-clr currNum1
-ldi pat,43;;+
-jmp coend
+	cpi row,1
+	brne equal
+	ldi r30,2; 2 stand for plus
+plusb:
+	clr currNum0
+	clr currNum1
+	ldi pat,43;;+
+	jmp coend
 
 equal:
-clr currNum0
-clr currNum1
-cpi row,2
-brne coend
-
-ldi pat,61
-
+	clr currNum0
+	clr currNum1
+	cpi row,2
+	brne D
+	ldi pat,61;;;;;;; = is here. 
 coend:
-jmp convert_end
-
+	jmp convert_end
+D:
+	lds temp,incflag
+	ldi temp,1
+	sts incflag,temp
+	ldi pat,68
+	jmp convert_end
 symbols:
 cpi col, 0 ; check if we have a star
 breq star
 cpi col, 1 ; or if we have zero
 breq zero
 ldi pat, 35; we'll output for hash
+lds temp,incflag
+ldi temp,1
+sts incflag,temp
 jmp convert_end
 
 star:
+lds temp,incflag
+ldi temp,1
+sts incflag,temp
 ldi pat, 42 ; we'll output  for star
 jmp convert_end
 
@@ -292,17 +306,23 @@ ldi pat,48 ; set to zero
 
 
 convert_end:
+lds temp,Cout
+inc temp
+sts Cout,temp
+mov temp,temp2
 lds temp2,Cout
 cpi temp2,17
+mov temp2,temp
+	out PORTC,rstNum0
 brne bc
-	do_lcd_command 0b00000001     ;;;why i cant use register to store counter???
-	clear Cout
+	do_lcd_command 0b11000000     ;;;why i cant use register to store counter???
+	;clear Cout
 bc:
 	do_lcd_data pat; write value to LCD
-;clr temp
-cpi pat,61
-breq showresult
-ret ; return to caller
+	;clr temp
+	cpi pat,61
+	breq showresult
+	ret ; return to caller
 
 showresult:
 
@@ -345,9 +365,9 @@ showresult:
 	clear Results
 	ret
 b1:
-clr r26
-clr r27
- rjmp b0
+	clr r26
+	clr r27
+	rjmp b0
 doubleloop0:
 	inc count
 	cpi count, 1
@@ -448,18 +468,41 @@ sleep_5ms:
 	rcall sleep_1ms
 	ret
 
-overflow1:
-	rjmp overflow
+incor:
+	ldi temp,105
+	do_lcd_data temp
+	ldi temp,110
+	do_lcd_data temp
+	ldi temp,99
+	do_lcd_data temp
+	ldi temp,101
+	do_lcd_data temp
+	ldi temp,120
+	do_lcd_data temp
+	ldi temp,112
+	do_lcd_data temp
+	rjmp endd
+
+overow:jmp overflow
+
 wan:
-	
+	lds temp,incflag
+	cpi temp,1
+	breq incor
 	clr r30
-load_results rstNum0,rstNum1
-	brvs overflow1
+	load_results rstNum0,rstNum1
+
+	ldi temp,low(0x7FFF)
+	ldi temp2,high(0x7FFF)
+	cp currNum0, temp
+	cpc currNum1, temp2
+	brvs overow
 	ldi temp,0b10000000
 	cpc rstNum1,temp
 	brsh ones
 	rjmp conti
-	ones:
+
+ones:
 
 	com rstNum0
 	com rstNum1
@@ -469,88 +512,93 @@ load_results rstNum0,rstNum1
 	adc rstNum1,r0
 	ldi temp,45
 	do_lcd_data temp
+
 conti:
-ldi currNum0,low(10000)
-ldi currNum1,high(10000)
+	ldi currNum0,low(10000)
+	ldi currNum1,high(10000)
 
-cp rstNum0,currNum0
-cpc rstNum1,currNum1
+	cp rstNum0,currNum0
+	cpc rstNum1,currNum1
 
-brlt qian
-lds temp,digits+4
-inc temp
-sts digits+4,temp
-sub rstNum0,currNum0
-sbc rstNum1,currNum1
+	brlt qian
+	lds temp,digits+4
+	inc temp
+	sts digits+4,temp
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
 
-rjmp wan
+	rjmp conti
+
 qian:
-ldi currNum0,low(1000)
-ldi currNum1,high(1000)
+	ldi currNum0,low(1000)
+	ldi currNum1,high(1000)
 
-cp rstNum0,currNum0
-cpc rstNum1,currNum1
+	cp rstNum0,currNum0
+	cpc rstNum1,currNum1
 
-brlt bai
-lds temp,digits+3
-inc temp
-sts digits+3,temp
-sub rstNum0,currNum0
-sbc rstNum1,currNum1
+	brlt bai
+	lds temp,digits+3
+	inc temp
+	sts digits+3,temp
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
 
-rjmp qian
+	rjmp qian
 bai:
-ldi currNum0,low(100)
-ldi currNum1,high(100)
+	ldi currNum0,low(100)
+	ldi currNum1,high(100)
 
-cp rstNum0,currNum0
-cpc rstNum1,currNum1
+	cp rstNum0,currNum0
+	cpc rstNum1,currNum1
 
-brlt shi
-lds temp,digits+2
-inc temp
-sts digits+2,temp
-sub rstNum0,currNum0
-sbc rstNum1,currNum1
+	brlt shi
+	lds temp,digits+2
+	inc temp
+	sts digits+2,temp
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
 
-rjmp bai
+	rjmp bai
+
 shi:
-ldi currNum0,low(10)
-ldi currNum1,high(10)
-cp rstNum0,currNum0
-cpc rstNum1,currNum1
+	ldi currNum0,low(10)
+	ldi currNum1,high(10)
+	cp rstNum0,currNum0
+	cpc rstNum1,currNum1
 
-brlt ge
-lds temp,digits+1
-inc temp
-sts digits+1,temp
-sub rstNum0,currNum0
-sbc rstNum1,currNum1
+	brlt ge
+	lds temp,digits+1
+	inc temp
+	sts digits+1,temp
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
 
-rjmp shi
+	rjmp shi
+
 ge:
 
-ldi currNum0,low(1)
-ldi currNum1,high(1)
+	ldi currNum0,low(1)
+	ldi currNum1,high(1)
 
-cp rstNum0,currNum0
-cpc rstNum1,currNum1
+	cp rstNum0,currNum0
+	cpc rstNum1,currNum1
 
-brlt endge
-lds temp,digits
-inc temp
-sts digits,temp
-sub rstNum0,currNum0
-sbc rstNum1,currNum1
+	brlt endge
+	lds temp,digits
+	inc temp
+	sts digits,temp
+	sub rstNum0,currNum0
+	sbc rstNum1,currNum1
 
-rjmp ge
+	rjmp ge
 
 endge:
 
-rjmp showdigit
+	rjmp showdigit
 
 
 overflow:
+	do_lcd_command 0b00000001
 	ldi temp,79
 	do_lcd_data temp
 	ldi temp,118
