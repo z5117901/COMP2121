@@ -2,7 +2,7 @@
  * taskB.asm
  *
  *  Created: 2017/9/27 11:43:27
- *   Author: biglo
+ *   Author: Cameron
  */ 
  ;IMPORTANT NOTICE: 
 ;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ¡­, 7).  
@@ -326,7 +326,7 @@ bc:
 
 showresult:
 
-	rjmp wan
+	rjmp asciitodigit
 	showdigit:
 	clr currNum0
 	clr currNum1
@@ -485,7 +485,7 @@ incor:
 
 overow:jmp overflow
 
-wan:
+asciitodigit:
 	lds temp,incflag
 	cpi temp,1
 	breq incor
@@ -500,7 +500,7 @@ wan:
 	ldi temp,0b10000000
 	cpc rstNum1,temp
 	brsh ones
-	rjmp conti
+	rjmp tenthousand
 
 ones:
 
@@ -513,69 +513,69 @@ ones:
 	ldi temp,45
 	do_lcd_data temp
 
-conti:
+tenthousand:
 	ldi currNum0,low(10000)
 	ldi currNum1,high(10000)
 
 	cp rstNum0,currNum0
 	cpc rstNum1,currNum1
 
-	brlt qian
+	brlt thousand
 	lds temp,digits+4
 	inc temp
 	sts digits+4,temp
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
 
-	rjmp conti
+	rjmp tenthousand
 
-qian:
+thousand:
 	ldi currNum0,low(1000)
 	ldi currNum1,high(1000)
 
 	cp rstNum0,currNum0
 	cpc rstNum1,currNum1
 
-	brlt bai
+	brlt hundred
 	lds temp,digits+3
 	inc temp
 	sts digits+3,temp
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
 
-	rjmp qian
-bai:
+	rjmp thousand
+hundred:
 	ldi currNum0,low(100)
 	ldi currNum1,high(100)
 
 	cp rstNum0,currNum0
 	cpc rstNum1,currNum1
 
-	brlt shi
+	brlt ten
 	lds temp,digits+2
 	inc temp
 	sts digits+2,temp
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
 
-	rjmp bai
+	rjmp hundred
 
-shi:
+ten:
 	ldi currNum0,low(10)
 	ldi currNum1,high(10)
 	cp rstNum0,currNum0
 	cpc rstNum1,currNum1
 
-	brlt ge
+	brlt one
 	lds temp,digits+1
 	inc temp
 	sts digits+1,temp
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
 
-	rjmp shi
+	rjmp ten
 
-ge:
+one:
 
 	ldi currNum0,low(1)
 	ldi currNum1,high(1)
@@ -590,7 +590,7 @@ ge:
 	sub rstNum0,currNum0
 	sbc rstNum1,currNum1
 
-	rjmp ge
+	rjmp one
 
 endge:
 
