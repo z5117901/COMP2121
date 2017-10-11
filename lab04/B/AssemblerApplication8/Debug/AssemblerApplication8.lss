@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.6  c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm Wed Oct 11 12:12:05 2017
+AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm Wed Oct 11 13:01:36 2017
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
-c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm(12): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
+C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm(12): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
-c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm(12): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
+C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm(12): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
                                  
                                  ;IMPORTANT NOTICE: 
                                  
@@ -1844,7 +1844,7 @@ c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplica
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
-                                 ;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ¡­, 7).  
+                                 ;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ï¿½ï¿½, 7).  
                                  
                                  ;Board settings: 
                                  ;Connect the four columns C0~C3 of the keypad to PL3~PL0 of PORTL and the four rows R0~R3 to PL7~PL4 of PORTL.
@@ -1909,6 +1909,7 @@ c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplica
                                  .equ ROWMASK = 0x0F
                                  
                                  
+                                 
                                  .macro do_lcd_command
                                  	ldi r21, @0
                                  	rcall lcd_command
@@ -1955,242 +1956,257 @@ c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplica
 00007f 2700                      	clr temp
 000080 bb01                      	out PORTF, temp
 000081 b902                      	out PORTA, temp
+000082 2777                      	clr r23
                                  
-000082 e358
-000083 d069
-000084 d082                      	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
-000085 d09d                      	rcall sleep_5ms
-000086 e358
-000087 d065
-000088 d07e                      	do_lcd_command 0b00111000 ; 2x5x7
-000089 d090                      	rcall sleep_1ms
-00008a e358
-00008b d061
-00008c d07a                      	do_lcd_command 0b00111000 ; 2x5x7
-00008d e358
-00008e d05e
-00008f d077                      	do_lcd_command 0b00111000 ; 2x5x7
-000090 e058
-000091 d05b
-000092 d074                      	do_lcd_command 0b00001000 ; display off?
-000093 e051
-000094 d058
-000095 d071                      	do_lcd_command 0b00000001 ; clear display
-000096 e056
-000097 d055
-000098 d06e                      	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
-000099 e05e
-00009a d052
-00009b d06b                      	do_lcd_command 0b00001110 ; display on,Cursor off, no blink
-00009c e158
-00009d d04f
-00009e d068                      	do_lcd_command 0b00011000
+000083 e358
+000084 d06c
+000085 d085                      	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
+000086 d0a7                      	rcall sleep_5ms
+000087 e358
+000088 d068
+000089 d081                      	do_lcd_command 0b00111000 ; 2x5x7
+00008a d09a                      	rcall sleep_1ms
+00008b e358
+00008c d064
+00008d d07d                      	do_lcd_command 0b00111000 ; 2x5x7
+00008e e358
+00008f d061
+000090 d07a                      	do_lcd_command 0b00111000 ; 2x5x7
+000091 e058
+000092 d05e
+000093 d077                      	do_lcd_command 0b00001000 ; display off?
+000094 e051
+000095 d05b
+000096 d074                      	do_lcd_command 0b00000001 ; clear display
+000097 e056
+000098 d058
+000099 d071                      	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
+00009a e05e
+00009b d055
+00009c d06e                      	do_lcd_command 0b00001110 ; display on,Cursor off, no blink
+00009d e158
+00009e d052
+00009f d06b                      	do_lcd_command 0b00011000
                                  
                                  
                                  
                                  ; main keeps scanning the keypad to find which key is pressed.
                                  main:
-00009f ee3f                      ldi mask, INITCOLMASK ; initial column mask
-0000a0 2722                      clr col ; initial column
+0000a0 ee3f                      ldi mask, INITCOLMASK ; initial column mask
+0000a1 2722                      clr col ; initial column
                                  
                                  colloop:
-0000a1 9330 010b                 STS PORTL, mask ; set column to mask value (sets column 0 off)
-0000a3 ef0f                      ldi temp, 0xFF ; implement a delay so the hardware can stabilize
+0000a2 9330 010b                 STS PORTL, mask ; set column to mask value (sets column 0 off)
+0000a4 ef0f                      ldi temp, 0xFF ; implement a delay so the hardware can stabilize
                                  delay:
-0000a4 950a                      dec temp
-0000a5 f7f1                      brne delay
-0000a6 9100 0109                 LDS temp, PINL ; read PORTL. Cannot use in 
-0000a8 700f                      andi temp, ROWMASK ; read only the row bits
-0000a9 300f                      cpi temp, 0xF ; check if any rows are grounded
-0000aa f061                      breq nextcol ; if not go to the next column
-0000ab e031                      ldi mask, INITROWMASK ; initialise row check
-0000ac 2711                      clr row ; initial row
+0000a5 950a                      dec temp
+0000a6 f7f1                      brne delay
+0000a7 9100 0109                 LDS temp, PINL ; read PORTL. Cannot use in 
+0000a9 700f                      andi temp, ROWMASK ; read only the row bits
+0000aa 300f                      cpi temp, 0xF ; check if any rows are grounded
+0000ab f061                      breq nextcol ; if not go to the next column
+0000ac e031                      ldi mask, INITROWMASK ; initialise row check
+0000ad 2711                      clr row ; initial row
                                  
                                  rowloop:      
-0000ad 2f40                      mov temp2, temp
-0000ae 2343                      and temp2, mask ; check masked bit
-0000af f419                      brne skipconv ; if the result is non-zero, we need to look again
-0000b0 d00d                      rcall convert ; if bit is clear, convert the bitcode
-0000b1 940c 009f                 jmp main ; and start again
+0000ae 2f40                      mov temp2, temp
+0000af 2343                      and temp2, mask ; check masked bit
+0000b0 f419                      brne skipconv ; if the result is non-zero, we need to look again
+0000b1 d00d                      rcall convert ; if bit is clear, convert the bitcode
+0000b2 940c 00a0                 jmp main ; and start again
                                  
                                  skipconv:
-0000b3 9513                      inc row ; else move to the next row
-0000b4 0f33                      lsl mask ; shift the mask to the next bit
-0000b5 940c 00ad                 jmp rowloop    
+0000b4 9513                      inc row ; else move to the next row
+0000b5 0f33                      lsl mask ; shift the mask to the next bit
+0000b6 940c 00ae                 jmp rowloop    
                                        
                                  nextcol:     
-0000b7 3023                      cpi col, 3 ; check if we^Òre on the last column
-0000b8 f331                      breq main ; if so, no buttons were pushed,
+0000b8 3023                      cpi col, 3 ; check if we^ï¿½re on the last column
+0000b9 f331                      breq main ; if so, no buttons were pushed,
                                  ; so start again.
                                  
-0000b9 9408                      sec ; else shift the column mask:
+0000ba 9408                      sec ; else shift the column mask:
                                  ; We must set the carry bit
-0000ba 1f33                      rol mask ; and then rotate left by a bit, shifting the carry into bit zero. We need this to make sure all the rows have pull-up resistors
-0000bb 9523                      inc col ; increment column value
-0000bc 940c 00a1                 jmp colloop ; and check the next column convert function converts the row and column given to a binary number and also outputs the value to PORTC. 
+0000bb 1f33                      rol mask ; and then rotate left by a bit, shifting the carry into bit zero. We need this to make sure all the rows have pull-up resistors
+0000bc 9523                      inc col ; increment column value
+0000bd 940c 00a2                 jmp colloop ; and check the next column convert function converts the row and column given to a binary number and also outputs the value to PORTC. 
                                  ; Inputs come from registers row and col and output is in temp.
                                  
                                  convert:
-0000be 3023                      cpi col, 3 ; if column is 3 we have a letter
-0000bf f0b1                      breq letters
+0000bf 3023                      cpi col, 3 ; if column is 3 we have a letter
+0000c0 f0b1                      breq letters
                                  
-0000c0 3013                      cpi row, 3 ; if row is 3 we have a symbol or 0
-0000c1 f0c1                      breq symbols
+0000c1 3013                      cpi row, 3 ; if row is 3 we have a symbol or 0
+0000c2 f0c1                      breq symbols
                                  
-0000c2 3010                      cpi row, 0
-0000c3 f021                      breq row1
+0000c3 3010                      cpi row, 0
+0000c4 f021                      breq row1
                                  
-0000c4 3011                      cpi row, 1
-0000c5 f031                      breq row2
+0000c5 3011                      cpi row, 1
+0000c6 f031                      breq row2
                                  
-0000c6 3012                      cpi row, 2
-0000c7 f041                      breq row3
+0000c7 3012                      cpi row, 2
+0000c8 f041                      breq row3
                                  
                                  row1:
-0000c8 e301                      ldi temp, '1'
-0000c9 0f02                      add temp, col ; add the column address
-0000ca 940c 00e5                 jmp convert_end
+0000c9 e301                      ldi temp, '1'
+0000ca 0f02                      add temp, col ; add the column address
+0000cb 940c 00e6                 jmp convert_end
                                  
                                  row2:
-0000cc e304                      ldi temp, '4'
-0000cd 0f02                      add temp, col ; add the column address
-0000ce 940c 00e5                 jmp convert_end
+0000cd e304                      ldi temp, '4'
+0000ce 0f02                      add temp, col ; add the column address
+0000cf 940c 00e6                 jmp convert_end
                                  
                                  row3:
-0000d0 e307                      ldi temp, '7'
-0000d1 0f02                      add temp, col ; add the column address
-0000d2 940c 00e5                 jmp convert_end
+0000d1 e307                      ldi temp, '7'
+0000d2 0f02                      add temp, col ; add the column address
+0000d3 940c 00e6                 jmp convert_end
                                  
                                  
                                  ; to get the offset from 1
                                   ; add 1. Value of switch is
                                  ; row*3 + col + 1.
-0000d4 940c 00e5                 jmp convert_end
+0000d5 940c 00e6                 jmp convert_end
                                  
                                  letters:
-0000d6 e401                      ldi temp, 'A'
-0000d7 0f01                      add temp, row ; increment from 0xA by the row value
-0000d8 940c 00e5                 jmp convert_end
+0000d7 e401                      ldi temp, 'A'
+0000d8 0f01                      add temp, row ; increment from 0xA by the row value
+0000d9 940c 00e6                 jmp convert_end
                                  
                                  symbols:
-0000da 3020                      cpi col, 0 ; check if we have a star
-0000db f029                      breq star
-0000dc 3021                      cpi col, 1 ; or if we have zero
-0000dd f031                      breq zero
+0000db 3020                      cpi col, 0 ; check if we have a star
+0000dc f029                      breq star
+0000dd 3021                      cpi col, 1 ; or if we have zero
+0000de f031                      breq zero
                                  
-0000de e203                      ldi temp, '#' ; we'll output 0xF for hash
-0000df 940c 00e5                 jmp convert_end
+0000df e203                      ldi temp, '#' ; we'll output 0xF for hash
+0000e0 940c 00e6                 jmp convert_end
                                  
                                  star:
-0000e1 e20a                      ldi temp, '*' ; we'll output 0xE for star
-0000e2 940c 00e5                 jmp convert_end
+0000e2 e20a                      ldi temp, '*' ; we'll output 0xE for star
+0000e3 940c 00e6                 jmp convert_end
                                  
                                  zero:
-0000e4 e300                      ldi temp, '0' ; set to zero
+0000e5 e300                      ldi temp, '0' ; set to zero
+                                 
                                  
                                  convert_end:
-0000e5 2f60                      mov r22, temp
-0000e6 d011                      rcall lcd_data
-0000e7 d01f                      rcall lcd_wait
-0000e8 d040                      rcall sleep_25ms
-0000e9 d03f                      rcall sleep_25ms
-0000ea d03e                      rcall sleep_25ms
-0000eb d043                      rcall sleep_100ms
-0000ec 9508                      ret ; return to caller
+0000e6 9573                      inc r23
+0000e7 3171                      cpi r23, 17
+0000e8 f1a9                      breq resetLCD
+                                 ;
+0000e9 2f60                      mov r22, temp
+0000ea d011                      rcall lcd_data
+0000eb d01f                      rcall lcd_wait
+0000ec d047                      rcall sleep_25ms
+0000ed d046                      rcall sleep_25ms
+0000ee d045                      rcall sleep_25ms
+0000ef d04a                      rcall sleep_100ms
+0000f0 9508                      ret ; return to caller
                                  
                                  
                                  ;;;;lcdddddd
                                  lcd_command:
-0000ed bb51                      	out PORTF, r21
-0000ee 0000                      	nop
-0000ef 9a16                      	lcd_set LCD_E
-0000f0 0000                      	nop
-0000f1 0000                      	nop
+0000f1 bb51                      	out PORTF, r21
 0000f2 0000                      	nop
-0000f3 9816                      	lcd_clr LCD_E
+0000f3 9a16                      	lcd_set LCD_E
 0000f4 0000                      	nop
 0000f5 0000                      	nop
 0000f6 0000                      	nop
-0000f7 9508                      	ret
+0000f7 9816                      	lcd_clr LCD_E
+0000f8 0000                      	nop
+0000f9 0000                      	nop
+0000fa 0000                      	nop
+0000fb 9508                      	ret
                                  
                                  lcd_data:
-0000f8 bb61                      	out PORTF, r22
-0000f9 9a17                      	lcd_set LCD_RS
-0000fa 0000                      	nop
-0000fb 0000                      	nop
-0000fc 0000                      	nop
-0000fd 9a16                      	lcd_set LCD_E
+0000fc bb61                      	out PORTF, r22
+0000fd 9a17                      	lcd_set LCD_RS
 0000fe 0000                      	nop
 0000ff 0000                      	nop
 000100 0000                      	nop
-000101 9816                      	lcd_clr LCD_E
+000101 9a16                      	lcd_set LCD_E
 000102 0000                      	nop
 000103 0000                      	nop
 000104 0000                      	nop
-000105 9817                      	lcd_clr LCD_RS
-000106 9508                      	ret
+000105 9816                      	lcd_clr LCD_E
+000106 0000                      	nop
+000107 0000                      	nop
+000108 0000                      	nop
+000109 9817                      	lcd_clr LCD_RS
+00010a 9508                      	ret
                                  
                                  lcd_wait:
-000107 935f                      	push r21
-000108 2755                      	clr r21
-000109 bb50                      	out DDRF, r21
-00010a bb51                      	out PORTF, r21
-00010b 9a15                      	lcd_set LCD_RW
+00010b 935f                      	push r21
+00010c 2755                      	clr r21
+00010d bb50                      	out DDRF, r21
+00010e bb51                      	out PORTF, r21
+00010f 9a15                      	lcd_set LCD_RW
                                  lcd_wait_loop:
-00010c 0000                      	nop
-00010d 9a16                      	lcd_set LCD_E
-00010e 0000                      	nop
-00010f 0000                      	nop
-000110 0000                              nop
-000111 b15f                      	in r21, PINF
-000112 9816                      	lcd_clr LCD_E
-000113 fd57                      	sbrc r21, 7
-000114 cff7                      	rjmp lcd_wait_loop
-000115 9815                      	lcd_clr LCD_RW
-000116 ef5f                      	ser r21
-000117 bb50                      	out DDRF, r21
-000118 915f                      	pop r21
-000119 9508                      	ret
+000110 0000                      	nop
+000111 9a16                      	lcd_set LCD_E
+000112 0000                      	nop
+000113 0000                      	nop
+000114 0000                              nop
+000115 b15f                      	in r21, PINF
+000116 9816                      	lcd_clr LCD_E
+000117 fd57                      	sbrc r21, 7
+000118 cff7                      	rjmp lcd_wait_loop
+000119 9815                      	lcd_clr LCD_RW
+00011a ef5f                      	ser r21
+00011b bb50                      	out DDRF, r21
+00011c 915f                      	pop r21
+00011d 9508                      	ret
                                  
+                                 resetLCD:
+00011e e051
+00011f dfd1
+000120 dfea                      	do_lcd_command 0b00000001 ; clear display
+000121 e575                      	ldi r23, 0b01010101
+000122 b978                      	out PORTC, r23
+000123 2777                      	clr r23
+                                 
+000124 cfc1                      	rjmp convert_end
                                  
                                  .equ F_CPU = 16000000
                                  .equ DELAY_1MS = F_CPU / 4 / 1000 - 4;;;;;i dont understand
                                  
                                  sleep_1ms:
-00011a 938f                      	push r24
-00011b 939f                      	push r25
-00011c e09f                      	ldi r25, high(DELAY_1MS)
-00011d e98c                      	ldi r24, low(DELAY_1MS)
+000125 938f                      	push r24
+000126 939f                      	push r25
+000127 e09f                      	ldi r25, high(DELAY_1MS)
+000128 e98c                      	ldi r24, low(DELAY_1MS)
                                  
                                  delayloop_1ms:
-00011e 9701                      	sbiw r25:r24, 1
-00011f f7f1                      	brne delayloop_1ms
-000120 919f                      	pop r25
-000121 918f                      	pop r24
-000122 9508                      	ret
+000129 9701                      	sbiw r25:r24, 1
+00012a f7f1                      	brne delayloop_1ms
+00012b 919f                      	pop r25
+00012c 918f                      	pop r24
+00012d 9508                      	ret
                                  
                                  sleep_5ms:
-000123 dff6                      	rcall sleep_1ms
-000124 dff5                      	rcall sleep_1ms
-000125 dff4                      	rcall sleep_1ms
-000126 dff3                      	rcall sleep_1ms
-000127 dff2                      	rcall sleep_1ms
-000128 9508                      	ret
+00012e dff6                      	rcall sleep_1ms
+00012f dff5                      	rcall sleep_1ms
+000130 dff4                      	rcall sleep_1ms
+000131 dff3                      	rcall sleep_1ms
+000132 dff2                      	rcall sleep_1ms
+000133 9508                      	ret
                                  
                                  sleep_25ms:
-000129 dff9                      	rcall sleep_5ms
-00012a dff8                      	rcall sleep_5ms
-00012b dff7                      	rcall sleep_5ms
-00012c dff6                      	rcall sleep_5ms
-00012d dff5                      	rcall sleep_5ms
-00012e 9508                      	ret
+000134 dff9                      	rcall sleep_5ms
+000135 dff8                      	rcall sleep_5ms
+000136 dff7                      	rcall sleep_5ms
+000137 dff6                      	rcall sleep_5ms
+000138 dff5                      	rcall sleep_5ms
+000139 9508                      	ret
                                  
                                  sleep_100ms:
-00012f dff9                      	rcall sleep_25ms
-000130 dff8                      	rcall sleep_25ms
-000131 dff7                      	rcall sleep_25ms
-000132 dff6                      	rcall sleep_25ms
-000133 9508                      	ret
+00013a dff9                      	rcall sleep_25ms
+00013b dff8                      	rcall sleep_25ms
+00013c dff7                      	rcall sleep_25ms
+00013d dff6                      	rcall sleep_25ms
+00013e 9508                      	ret
 
 
 RESOURCE USE INFORMATION
@@ -2211,26 +2227,26 @@ counted separately from r26..r31 here.
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
 r13:   0 r14:   0 r15:   0 r16:  33 r17:   7 r18:   9 r19:   6 r20:   2 
-r21:  19 r22:   2 r23:   0 r24:   4 r25:   4 r26:   0 r27:   0 r28:   0 
+r21:  20 r22:   2 r23:   6 r24:   4 r25:   4 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
-Registers used: 9 out of 35 (25.7%)
+Registers used: 10 out of 35 (28.6%)
 
 "ATmega2560" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   4 adiw  :   0 and   :   1 
 andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   9 brge  :   0 brhc  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :  10 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   5 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   4 cls   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   6 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   9 cpse  :   0 dec   :   1 eicall:   0 eijmp :   0 elpm  :   0 
+cpi   :  10 cpse  :   0 dec   :   1 eicall:   0 eijmp :   0 elpm  :   0 
 eor   :   0 fmul  :   0 fmuls :   0 fmulsu:   0 icall :   0 ijmp  :   0 
-in    :   1 inc   :   2 jmp   :  11 ld    :   0 ldd   :   0 ldi   :  24 
+in    :   1 inc   :   3 jmp   :  11 ld    :   0 ldd   :   0 ldi   :  26 
 lds   :   1 lpm   :   0 lsl   :   1 lsr   :   0 mov   :   2 movw  :   0 
 mul   :   0 muls  :   0 mulsu :   0 neg   :   0 nop   :  20 or    :   0 
-ori   :   0 out   :  13 pop   :   3 push  :   3 rcall :  41 ret   :   8 
-reti  :   0 rjmp  :   1 rol   :   1 ror   :   0 sbc   :   0 sbci  :   0 
+ori   :   0 out   :  14 pop   :   3 push  :   3 rcall :  43 ret   :   8 
+reti  :   0 rjmp  :   2 rol   :   1 ror   :   0 sbc   :   0 sbci  :   0 
 sbi   :   5 sbic  :   0 sbis  :   0 sbiw  :   1 sbr   :   0 sbrc  :   1 
 sbrs  :   0 sec   :   1 seh   :   0 sei   :   0 sen   :   0 ser   :   3 
 ses   :   0 set   :   0 sev   :   0 sez   :   0 sleep :   0 spm   :   0 
@@ -2241,7 +2257,7 @@ Instructions used: 30 out of 116 (25.9%)
 "ATmega2560" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000268    392      0    392  262144   0.1%
+[.cseg] 0x000000 0x00027e    414      0    414  262144   0.2%
 [.dseg] 0x000200 0x000200      0      0      0    8192   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    4096   0.0%
 

@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.6  c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm Wed Oct 11 12:12:05 2017
+AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm Wed Oct 11 13:01:36 2017
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1373,29 +1373,30 @@ EQU  LCD_E        00000006
 EQU  LCD_RW       00000005
 EQU  LCD_BE       00000004
 CSEG RESET        00000072
-CSEG lcd_command  000000ed
-CSEG lcd_wait     00000107
-CSEG sleep_5ms    00000123
-CSEG sleep_1ms    0000011a
-CSEG main         0000009f
-CSEG colloop      000000a1
-CSEG delay        000000a4
-CSEG nextcol      000000b7
-CSEG rowloop      000000ad
-CSEG skipconv     000000b3
-CSEG convert      000000be
-CSEG letters      000000d6
-CSEG symbols      000000da
-CSEG row1         000000c8
-CSEG row2         000000cc
-CSEG row3         000000d0
-CSEG convert_end  000000e5
-CSEG star         000000e1
-CSEG zero         000000e4
-CSEG lcd_data     000000f8
-CSEG sleep_25ms   00000129
-CSEG sleep_100ms  0000012f
-CSEG lcd_wait_loop 0000010c
+CSEG lcd_command  000000f1
+CSEG lcd_wait     0000010b
+CSEG sleep_5ms    0000012e
+CSEG sleep_1ms    00000125
+CSEG main         000000a0
+CSEG colloop      000000a2
+CSEG delay        000000a5
+CSEG nextcol      000000b8
+CSEG rowloop      000000ae
+CSEG skipconv     000000b4
+CSEG convert      000000bf
+CSEG letters      000000d7
+CSEG symbols      000000db
+CSEG row1         000000c9
+CSEG row2         000000cd
+CSEG row3         000000d1
+CSEG convert_end  000000e6
+CSEG star         000000e2
+CSEG zero         000000e5
+CSEG resetLCD     0000011e
+CSEG lcd_data     000000fc
+CSEG sleep_25ms   00000134
+CSEG sleep_100ms  0000013a
+CSEG lcd_wait_loop 00000110
 EQU  F_CPU        00f42400
 EQU  DELAY_1MS    00000f9c
-CSEG delayloop_1ms 0000011e
+CSEG delayloop_1ms 00000129

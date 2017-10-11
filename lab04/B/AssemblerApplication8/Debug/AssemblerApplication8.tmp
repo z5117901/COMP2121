@@ -1,18 +1,18 @@
 <ASSEMBLER_INFO>
  <VERSION>2.2.6</VERSION>
  <DEVICE>"ATmega2560"</DEVICE>
- <WORKING_DIR>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\Debug</WORKING_DIR>
+ <WORKING_DIR>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\Debug</WORKING_DIR>
  <INCLUDE_PATH>
   <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc</DIR>
   <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
   <DIR></DIR>
  </INCLUDE_PATH>
- <SOURCE_FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</SOURCE_FILE>
+ <SOURCE_FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</SOURCE_FILE>
  <INCLUDED_FILES>
   <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc</FILE>
  </INCLUDED_FILES>
  <OBJECT_FILES>
-  <FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\Debug\AssemblerApplication8.obj</FILE>
+  <FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\Debug\AssemblerApplication8.obj</FILE>
  </OBJECT_FILES>
  <HEX_FILES>
   <FILE>AssemblerApplication8.hex</FILE>
@@ -22,30 +22,31 @@
   <FILE>AssemblerApplication8.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <RESET><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>53</LINE></RESET>
-  <lcd_command><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>197</LINE></lcd_command>
-  <lcd_wait><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>227</LINE></lcd_wait>
-  <sleep_5ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>266</LINE></sleep_5ms>
-  <sleep_1ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>253</LINE></sleep_1ms>
-  <main><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>86</LINE></main>
-  <colloop><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>90</LINE></colloop>
-  <delay><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>93</LINE></delay>
-  <nextcol><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>115</LINE></nextcol>
-  <rowloop><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>103</LINE></rowloop>
-  <skipconv><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>110</LINE></skipconv>
-  <convert><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>127</LINE></convert>
-  <letters><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>164</LINE></letters>
-  <symbols><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>169</LINE></symbols>
-  <row1><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>143</LINE></row1>
-  <row2><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>148</LINE></row2>
-  <row3><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>153</LINE></row3>
-  <convert_end><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>185</LINE></convert_end>
-  <star><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>178</LINE></star>
-  <zero><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>182</LINE></zero>
-  <lcd_data><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>210</LINE></lcd_data>
-  <sleep_25ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>274</LINE></sleep_25ms>
-  <sleep_100ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>282</LINE></sleep_100ms>
-  <lcd_wait_loop><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>233</LINE></lcd_wait_loop>
-  <delayloop_1ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>259</LINE></delayloop_1ms>
+  <RESET><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>54</LINE></RESET>
+  <lcd_command><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>204</LINE></lcd_command>
+  <lcd_wait><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>234</LINE></lcd_wait>
+  <sleep_5ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>280</LINE></sleep_5ms>
+  <sleep_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>267</LINE></sleep_1ms>
+  <main><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>88</LINE></main>
+  <colloop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>92</LINE></colloop>
+  <delay><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>95</LINE></delay>
+  <nextcol><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>117</LINE></nextcol>
+  <rowloop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>105</LINE></rowloop>
+  <skipconv><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>112</LINE></skipconv>
+  <convert><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>129</LINE></convert>
+  <letters><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>166</LINE></letters>
+  <symbols><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>171</LINE></symbols>
+  <row1><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>145</LINE></row1>
+  <row2><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>150</LINE></row2>
+  <row3><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>155</LINE></row3>
+  <convert_end><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>188</LINE></convert_end>
+  <star><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>180</LINE></star>
+  <zero><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>184</LINE></zero>
+  <resetLCD><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>256</LINE></resetLCD>
+  <lcd_data><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>217</LINE></lcd_data>
+  <sleep_25ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>288</LINE></sleep_25ms>
+  <sleep_100ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>296</LINE></sleep_100ms>
+  <lcd_wait_loop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>240</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab04\B\AssemblerApplication8\main.asm</FILE><LINE>273</LINE></delayloop_1ms>
  </LABELS>
 </ASSEMBLER_INFO>

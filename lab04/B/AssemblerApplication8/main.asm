@@ -1,5 +1,5 @@
 ;IMPORTANT NOTICE: 
-;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ¡­, 7).  
+;The labels on PORTL are reversed, i.e., PLi is actually PL7-i (i=0, 1, ï¿½ï¿½, 7).  
 
 ;Board settings: 
 ;Connect the four columns C0~C3 of the keypad to PL3~PL0 of PORTL and the four rows R0~R3 to PL7~PL4 of PORTL.
@@ -19,6 +19,7 @@
 .equ INITCOLMASK = 0xEF
 .equ INITROWMASK = 0x01
 .equ ROWMASK = 0x0F
+
 
 
 .macro do_lcd_command
@@ -67,6 +68,7 @@ RESET:
 	clr temp
 	out PORTF, temp
 	out PORTA, temp
+	clr r23
 
 	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
 	rcall sleep_5ms
@@ -113,7 +115,7 @@ lsl mask ; shift the mask to the next bit
 jmp rowloop    
       
 nextcol:     
-cpi col, 3 ; check if we^Òre on the last column
+cpi col, 3 ; check if we^ï¿½re on the last column
 breq main ; if so, no buttons were pushed,
 ; so start again.
 
@@ -182,7 +184,12 @@ jmp convert_end
 zero:
 ldi temp, '0' ; set to zero
 
+
 convert_end:
+inc r23
+cpi r23, 17
+breq resetLCD
+;
 mov r22, temp
 rcall lcd_data
 rcall lcd_wait
@@ -246,6 +253,13 @@ lcd_wait_loop:
 	pop r21
 	ret
 
+resetLCD:
+	do_lcd_command 0b00000001 ; clear display
+	ldi r23, 0b01010101
+	out PORTC, r23
+	clr r23
+
+	rjmp convert_end
 
 .equ F_CPU = 16000000
 .equ DELAY_1MS = F_CPU / 4 / 1000 - 4;;;;;i dont understand
