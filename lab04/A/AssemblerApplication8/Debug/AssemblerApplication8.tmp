@@ -1,0 +1,45 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.6</VERSION>
+ <DEVICE>"ATmega2560"</DEVICE>
+ <WORKING_DIR>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\Debug\AssemblerApplication8.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>AssemblerApplication8.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>AssemblerApplication8.map</FILE>
+  <FILE>AssemblerApplication8.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <SecondCounter><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>54</LINE></SecondCounter>
+  <TempCounter><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>55</LINE></TempCounter>
+  <RESET><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>67</LINE></RESET>
+  <Timer0OVF><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>99</LINE></Timer0OVF>
+  <lcd_command><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>192</LINE></lcd_command>
+  <lcd_wait><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>222</LINE></lcd_wait>
+  <sleep_5ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>261</LINE></sleep_5ms>
+  <sleep_1ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>248</LINE></sleep_1ms>
+  <main><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>175</LINE></main>
+  <NotSecond><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>159</LINE></NotSecond>
+  <tsinc><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>148</LINE></tsinc>
+  <bac><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>120</LINE></bac>
+  <minu><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>152</LINE></minu>
+  <back><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>123</LINE></back>
+  <lcd_data><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>205</LINE></lcd_data>
+  <EndIf><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>165</LINE></EndIf>
+  <loop><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>187</LINE></loop>
+  <lcd_wait_loop><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>228</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>c:\users\ottof\Documents\Atmel Studio\7.0\AssemblerApplication8\AssemblerApplication8\main.asm</FILE><LINE>254</LINE></delayloop_1ms>
+ </LABELS>
+</ASSEMBLER_INFO>
