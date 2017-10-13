@@ -1,0 +1,27 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.6</VERSION>
+ <DEVICE>"ATmega2560"</DEVICE>
+ <WORKING_DIR>C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\Debug\a.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>a.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>a.map</FILE>
+  <FILE>a.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <start><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm</FILE><LINE>12</LINE></start>
+ </LABELS>
+</ASSEMBLER_INFO>
