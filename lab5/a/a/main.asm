@@ -51,6 +51,14 @@
 .def numberH = r18
 /////////////////////////////////////////////////
 
+
+.dseg
+	rps: .byte 2
+	secondCounter : .byte 2
+	tempCounter: .byte 2
+
+
+	
 .cseg	;;; Got this table from lecture slides
 ; Vector Table
 .org 0x0000
@@ -115,7 +123,7 @@ RESET:
 	
 	//THIS allows int2 to trigger falling edges which occurs when a 
 	//hole occurs in the motor wheel. Seen this in example code
-	// still to learn what isc20 &  eimsk are.
+	//still to learn what isc20 &  eimsk are.
 	//External Interrupt Control Register A
 	ldi temp, (2 <<ISC20)		
 	sts EICRA, temp
@@ -134,6 +142,18 @@ RESET:
 	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
 	do_lcd_command 0b00001110 ; display on,Cursor off, no blink
 	do_lcd_command 0b00011000
+	
+	//temp counter stuff to keep timer counts
+	clr temp	; in this temp is 0, this initalizes counts to 0
+	sts tempCounter, temp
+	sts tempCounter + 1, temp
+	sts secondCounter, temp
+	sts secondCounter + 1, temp
+	//Setting speed/amount of counts for the timer
+	ldi temp, 0b00000010
+	out TCCR0B, temp
+	ldi temp, 1 << TOIE0
+	sts TIMSK0, temp
 	
 
 	//
@@ -157,6 +177,46 @@ INTERRUPT2:
 	;epilogue
 	pop temp
 	reti
+
+//Updates lcd, shud be called every 100ms
+UPDATE_LCD:
+	;prologue
+	push temp
+	;body
+	ldi address, 
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	////////CAMERON///////
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	//////////////////////
+
+//INTERRUPT SUBROUTINE FOR TIMER0, not external, for how many
+//interup2s, for each second to get rpms
+Timer0OVF:
+	//prologue: saving conflicting registers and teh status regiser
+	in temp, SREG 
+	push temp
+	push r25
+	push r24
+	;;body
+	lds r24, tempCounter	//getting value of temp coints
+	lds r25, tempCounter + 1
+	adiw r25:r24, 1			//increasing temp counter by 1
+
+	cpi r24, low(781)		//this is due to 7812 = 10000000/128, so 1 second 
+	ldi temp, high(781)		// use 781 for 0.1 seconds
+	cpc r25,temp1
+	brne notSecond
+	// 0.1 seconds past so now to count speed and average it
+	ldi address, 0b10000000	 //the lcd homeline thing
+	asr numberH			//multiply number 
+	ror numberL
+
+
 
 
 
