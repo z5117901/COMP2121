@@ -13,7 +13,7 @@
 
 .include "m2560def.inc"
 
-;Constants for delay
+;Contsants for delay
 .equ F_CPU = 16000000
 .equ DELAY_1MS = F_CPU / 4 / 1000 - 4
 /////////////////////////////////////////////////
@@ -239,7 +239,7 @@ delayloop_1ms:
 	pop r25
 	pop r24
 	ret
-
+	
 sleep_5ms:
 	rcall sleep_1ms
 	rcall sleep_1ms
