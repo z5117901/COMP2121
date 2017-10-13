@@ -49,6 +49,10 @@
 .def temp = r16
 .def numberL = r17
 .def numberH = r18
+.def multTemp = r19
+.def mulResult1 = r20
+.def mulResult2 = r21
+.def mulResult3 = r22
 /////////////////////////////////////////////////
 
 
@@ -167,7 +171,9 @@ main:
 
 ;;Interupt1 stuff
 INTERRUPT2:
-	;prologue
+	adiw numberHigh:numberLow ,1
+	reti
+	/*;prologue
 	push temp
 	;body
 	ldi temp, 1
@@ -176,23 +182,9 @@ INTERRUPT2:
 	adc numberHigh, temp
 	;epilogue
 	pop temp
-	reti
+	reti*/
+	
 
-//Updates lcd, shud be called every 100ms
-UPDATE_LCD:
-	;prologue
-	push temp
-	;body
-	ldi address, 
-	//////////////////////
-	//////////////////////
-	//////////////////////
-	//////////////////////
-	////////CAMERON///////
-	//////////////////////
-	//////////////////////
-	//////////////////////
-	//////////////////////
 
 //INTERRUPT SUBROUTINE FOR TIMER0, not external, for how many
 //interup2s, for each second to get rpms
@@ -213,10 +205,23 @@ Timer0OVF:
 	brne notSecond
 	// 0.1 seconds past so now to count speed and average it
 	ldi address, 0b10000000	 //the lcd homeline thing
-	asr numberH			//multiply number 
-	ror numberL
+	
 
+	//THIS MULTIPLIES BY 10
+	ldi r23, 10
+	mul numberLow, r23
+	mov mulStore1, r0
+	mov mulStore2, r1
+	mul numberHigh, r23
+	mov mulResult3, r1
+	add mulResult2, r0
+	brcc NoInc
+	inc mulResult3
+	NoInc:
+	//TO DIVIDE BY 4, TIMES BY 2 AND THEN shift right twice, which is
+	//equal to dividing by 8
 
+	
 
 
 
