@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm Sun Oct 15 18:44:55 2017
+AVRASM ver. 2.2.6  C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\a\a\main.asm Sun Oct 15 20:51:19 2017
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1400,15 +1400,15 @@ CSEG delayloop_1ms 0000011a
 CSEG sleep_25ms   00000125
 CSEG sleep_100ms  0000012b
 CSEG writeTenThousand 00000140
-CSEG writeThousand 0000015b
-CSEG loopTenThousand 00000144
 CSEG displayTenThousand 00000151
-CSEG writeHundreds 00000176
-CSEG loopThousand 0000015f
+CSEG loopTenThousand 00000144
+CSEG writeThousand 0000015b
 CSEG displayThousand 0000016c
-CSEG writeTens    00000191
-CSEG loopHundred  0000017a
+CSEG loopThousand 0000015f
+CSEG writeHundreds 00000176
 CSEG displayHundred 00000187
-CSEG writeOnes    000001ac
-CSEG loopTen      00000195
+CSEG loopHundred  0000017a
+CSEG writeTens    00000191
 CSEG displayTen   000001a2
+CSEG loopTen      00000195
+CSEG writeOnes    000001ac

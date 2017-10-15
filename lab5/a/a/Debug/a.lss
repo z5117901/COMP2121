@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm Sun Oct 15 18:44:55 2017
+AVRASM ver. 2.2.6  C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\a\a\main.asm Sun Oct 15 20:51:19 2017
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
-C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
+C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\a\a\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
-C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
+C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\a\a\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc'
                                  
                                  ;
                                  
@@ -2133,6 +2133,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
                                  
                                  	//multiplies by 10, dont need to worry about carry
                                  	//as rpms wont be high enough
+                                 	
 0000ca 918f                      	pop r24
 0000cb 919f                      	pop r25
 0000cc e07a                      	ldi r23, 10
@@ -2145,7 +2146,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
 0000d3 2f95                      	mov numberH, resultH
 0000d4 2744                      	clr resultL
 0000d5 2755                      	clr resultH
-                                 
+                                 	
                                  	
 0000d6 d059                      	rcall write_number
                                  	//print "speed = numberH&L" to lcd
@@ -2290,7 +2291,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
 000140 3180                      		cpi numberL, low(10000)
 000141 e277                      		ldi tempS, high(10000)
 000142 0797                      		cpc numberH, tempS
-000143 f0b8                      		brlo writeThousand
+000143 f068                      		brlo displayTenThousand
                                  
                                  		loopTenThousand:
 000144 3180                      			cpi numberL, low(10000)			;Compares the number to 10000
@@ -2322,7 +2323,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
 00015b 3e88                      		cpi numberL, low(1000)
 00015c e073                      		ldi tempS, high(1000)
 00015d 0797                      		cpc numberH, tempS
-00015e f0b8                      		brlo writeHundreds
+00015e f068                      		brlo displayThousand
                                  
                                  		loopThousand:
 00015f 3e88                      			cpi numberL, low(1000)			;Compares the number to 1000
@@ -2354,7 +2355,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
 000176 3684                      		cpi numberL, low(100)
 000177 e070                      		ldi tempS, high(100)
 000178 0797                      		cpc numberH, tempS
-000179 f0b8                      		brlo writeTens
+000179 f068                      		brlo displayHundred
                                  
                                  		loopHundred:
 00017a 3684                      			cpi numberL, low(100)			;Compares the number to 100
@@ -2386,7 +2387,7 @@ C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm(14): Including file 'C:/P
 000191 308a                      		cpi numberL, low(10)
 000192 e070                      		ldi tempS, high(10)
 000193 0797                      		cpc numberH, tempS
-000194 f0b8                      		brlo writeOnes
+000194 f068                      		brlo displayTen
                                  
                                  		loopTen:
 000195 308a                      			cpi numberL, low(10)			;Compares the number to 10

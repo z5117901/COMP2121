@@ -227,6 +227,7 @@ Timer0OVF:
 
 	//multiplies by 10, dont need to worry about carry
 	//as rpms wont be high enough
+	
 	pop r24
 	pop r25
 	ldi r23, 10
@@ -239,7 +240,7 @@ Timer0OVF:
 	mov numberH, resultH
 	clr resultL
 	clr resultH
-
+	
 	
 	rcall write_number
 	//print "speed = numberH&L" to lcd
@@ -384,7 +385,7 @@ write_number:
 		cpi numberL, low(10000)
 		ldi tempS, high(10000)
 		cpc numberH, tempS
-		brlo writeThousand
+		brlo displayTenThousand
 
 		loopTenThousand:
 			cpi numberL, low(10000)			;Compares the number to 10000
@@ -412,7 +413,7 @@ write_number:
 		cpi numberL, low(1000)
 		ldi tempS, high(1000)
 		cpc numberH, tempS
-		brlo writeHundreds
+		brlo displayThousand
 
 		loopThousand:
 			cpi numberL, low(1000)			;Compares the number to 1000
@@ -440,7 +441,7 @@ write_number:
 		cpi numberL, low(100)
 		ldi tempS, high(100)
 		cpc numberH, tempS
-		brlo writeTens
+		brlo displayHundred
 
 		loopHundred:
 			cpi numberL, low(100)			;Compares the number to 100
@@ -468,7 +469,7 @@ write_number:
 		cpi numberL, low(10)
 		ldi tempS, high(10)
 		cpc numberH, tempS
-		brlo writeOnes
+		brlo displayTen
 
 		loopTen:
 			cpi numberL, low(10)			;Compares the number to 10
