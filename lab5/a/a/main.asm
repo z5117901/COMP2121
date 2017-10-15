@@ -47,12 +47,12 @@
 
 ;Basic register naming
 .def temp = r16
-.def numberL = r17
-.def numberH = r18
-.def multTemp = r19
-.def mulResult1 = r20
-.def mulResult2 = r21
-.def mulResult3 = r22
+.def fourCounter = r17
+.def numberL = r18
+.def numberH = r19
+.def resultL  = r20
+.def resultH = r21
+
 /////////////////////////////////////////////////
 
 
@@ -148,19 +148,18 @@ RESET:
 	do_lcd_command 0b00011000
 	
 	//temp counter stuff to keep timer counts
+	//16bit counter
 	clr temp	; in this temp is 0, this initalizes counts to 0
 	sts tempCounter, temp
 	sts tempCounter + 1, temp
-	sts secondCounter, temp
-	sts secondCounter + 1, temp
 	//Setting speed/amount of counts for the timer
 	//interupt occurs when overflow happens
-	ldi temp, 0b00000010
-	out TCCR0B, temp
+	ldi temp, 0b00000010	//sets prescalar to 8
+	out TCCR0B, temp	
 	ldi temp, 1 << TOIE0
 	sts TIMSK0, temp
 	
-
+	clr fourCounter
 	//
 	sei		//setting interupt flag
 
@@ -170,21 +169,20 @@ loop:
 
 ;;Interupt stuff
 //increases count of how many holes seen
+//counts seeing 4 holes as one revolution
 INTERRUPT2:
-	adiw numberHigh:numberLow ,1
-	reti
-	
-	/*;prologue
+	;prolouge
 	push temp
-	;body
-	ldi temp, 1
-	add numberLow ,temp
-	ldi temp, 0
-	adc numberHigh, temp
-	;epilogue
+	;main
+	ldi temp, 4
+	inc fourCounter
+	cp fourCounter, temp
+	brne NOTFOUR
+	adiw numberHigh:numberLow ,1
+	clr fourCounter
+	NOTFOUR:
 	pop temp
-	reti*/
-	
+	reti
 
 
 //INTERRUPT SUBROUTINE FOR TIMER0, not external, for how many
@@ -202,27 +200,23 @@ Timer0OVF:
 
 	cpi r24, low(781)		//this is due to 7812 = 10000000/128, so 1 second 
 	ldi temp, high(781)		// use 781 for 0.1 seconds
-	cpc r25,temp1
+	cpc r25, temp
 	brne NOTYET
 	// 0.1 seconds past so now to count speed and average it
-	ldi address, 0b10000000	 //the lcd homeline thing
-	
-	// NEED TO FIGURE HOW TO AVERAGE THE SPEED
-	/*
-	//THIS MULTIPLIES BY 10
+
+	//multiplies by 10, dont need to worry about carry
+	//as rpms wont be high enough
 	ldi r23, 10
-	mul numberLow, r23
-	mov mulStore1, r0
-	mov mulStore2, r1
-	mul numberHigh, r23
-	mov mulResult3, r1
-	add mulResult2, r0
-	brcc NoInc
-	inc mulResult3
-	NoInc:
-	//TO DIVIDE BY 4, TIMES BY 2 AND THEN shift right twice, which is
-	//equal to dividing by 8
-	*/
+	mul numberL, r23
+	mov resultL, r0
+	mov resultH, r1
+	mul numberH, r23
+	add resultH, r0
+
+	//print "speed = numberH&L" to lcd
+
+
+	
 	//now clear the revolution counter
 	clr numberL
 	clr numberH
@@ -231,12 +225,7 @@ Timer0OVF:
 	clr temp
 	sts tempCounter, temp
 	sts tempCounter + 1, temp
-	lds r24, secondCounter
-	lds r25, secondCounter + 1
-	adiw r25:r24, 1
 
-	sts secondCounter, r24
-	sts secondCounter + 1, r25
 	rjmp epi
 
 	NOTYET:
