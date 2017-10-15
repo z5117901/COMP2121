@@ -83,7 +83,7 @@
 	jmp DEFAULT 					; Timer/Counter2 Compare Match B
 	jmp DEFAULT 					; Timer/Counter2 Overflow
 	jmp DEFAULT 					; Timer/Counter1 Capture Event
-	jmp UPDATE_LCD 					; Timer/Counter1 Compare Match A
+	jmp DEFAULT 					; Timer/Counter1 Compare Match A
 	jmp DEFAULT 					; Timer/Counter1 Compare Match B
 	jmp DEFAULT 					; Timer/Counter1 Compare Match C
 	jmp DEFAULT 					; Timer/Counter1 Overflow
@@ -154,6 +154,7 @@ RESET:
 	sts secondCounter, temp
 	sts secondCounter + 1, temp
 	//Setting speed/amount of counts for the timer
+	//interupt occurs when overflow happens
 	ldi temp, 0b00000010
 	out TCCR0B, temp
 	ldi temp, 1 << TOIE0
@@ -162,17 +163,17 @@ RESET:
 
 	//
 	sei		//setting interupt flag
-	rjmp main
 
-end:
-	jmp end
+//just waiting for interupts now
+loop:	
+	jmp loop
 
-main:
-
-;;Interupt1 stuff
+;;Interupt stuff
+//increases count of how many holes seen
 INTERRUPT2:
 	adiw numberHigh:numberLow ,1
 	reti
+	
 	/*;prologue
 	push temp
 	;body
@@ -202,11 +203,12 @@ Timer0OVF:
 	cpi r24, low(781)		//this is due to 7812 = 10000000/128, so 1 second 
 	ldi temp, high(781)		// use 781 for 0.1 seconds
 	cpc r25,temp1
-	brne notSecond
+	brne NOTYET
 	// 0.1 seconds past so now to count speed and average it
 	ldi address, 0b10000000	 //the lcd homeline thing
 	
-
+	// NEED TO FIGURE HOW TO AVERAGE THE SPEED
+	/*
 	//THIS MULTIPLIES BY 10
 	ldi r23, 10
 	mul numberLow, r23
@@ -220,10 +222,33 @@ Timer0OVF:
 	NoInc:
 	//TO DIVIDE BY 4, TIMES BY 2 AND THEN shift right twice, which is
 	//equal to dividing by 8
+	*/
+	//now clear the revolution counter
+	clr numberL
+	clr numberH
 
+	//clear the timecounter
+	clr temp
+	sts tempCounter, temp
+	sts tempCounter + 1, temp
+	lds r24, secondCounter
+	lds r25, secondCounter + 1
+	adiw r25:r24, 1
+
+	sts secondCounter, r24
+	sts secondCounter + 1, r25
+	rjmp epi
+
+	NOTYET:
+		sts tempCounter, r24
+		sts tempCounter + 1, r25
 	
-
-
+	epi:
+		pop r24
+		pop r25
+		pop temp
+		out SREG, temp
+		reti
 
 
 //Delay functions taken from previous lab
