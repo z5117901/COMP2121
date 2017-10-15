@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm Fri Oct 13 14:05:48 2017
+AVRASM ver. 2.2.6  C:\Users\ottof\Desktop\2121\gitstuff\lab5\a\a\main.asm Sun Oct 15 18:44:55 2017
 
 
 EQU  SIGNATURE_000 0000001e
@@ -1359,4 +1359,56 @@ EQU  URXC3addr    0000006c
 EQU  UDRE3addr    0000006e
 EQU  UTXC3addr    00000070
 EQU  INT_VECTORS_SIZE 00000072
-CSEG start        00000000
+EQU  F_CPU        00f42400
+EQU  DELAY_1MS    00000f9c
+EQU  LCD_RS       00000007
+EQU  LCD_E        00000006
+EQU  LCD_RW       00000005
+EQU  LCD_BE       00000004
+SET  LCD_HOME_LINE 00000001
+DEF  temp         r16
+DEF  fourCounter  r17
+DEF  numberL      r24
+DEF  numberH      r25
+DEF  resultL      r20
+DEF  resultH      r21
+DEF  lcddisplayaddress r22
+DEF  tempS        r23
+DSEG secondCounter 00000200
+DSEG tempCounter  00000202
+DSEG TenThousand  00000204
+DSEG Thousand     00000205
+DSEG Hundred      00000206
+DSEG Ten          00000207
+DSEG One          00000208
+CSEG RESET        00000073
+CSEG DEFAULT      00000072
+CSEG INTERRUPT2   000000b1
+CSEG Timer0OVF    000000bc
+CSEG lcd_command  000000e9
+CSEG lcd_wait     00000103
+CSEG sleep_5ms    0000011f
+CSEG sleep_1ms    00000116
+CSEG loop         000000af
+CSEG NOTFOUR      000000b9
+CSEG NOTYET       000000df
+CSEG write_number 00000130
+CSEG epi          000000e5
+CSEG lcd_data     000000f4
+CSEG lcd_wait_loop 00000108
+CSEG delayloop_1ms 0000011a
+CSEG sleep_25ms   00000125
+CSEG sleep_100ms  0000012b
+CSEG writeTenThousand 00000140
+CSEG writeThousand 0000015b
+CSEG loopTenThousand 00000144
+CSEG displayTenThousand 00000151
+CSEG writeHundreds 00000176
+CSEG loopThousand 0000015f
+CSEG displayThousand 0000016c
+CSEG writeTens    00000191
+CSEG loopHundred  0000017a
+CSEG displayHundred 00000187
+CSEG writeOnes    000001ac
+CSEG loopTen      00000195
+CSEG displayTen   000001a2

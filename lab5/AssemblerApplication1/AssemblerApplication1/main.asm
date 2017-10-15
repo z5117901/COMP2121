@@ -1,54 +1,39 @@
-; Part A: Speed Measurement
-; Connect motor MOT to potentiometer POT to control motor's speed.
-; Connect optointerrupter's emitter OpE to +5V pin.
-; Connect output (OpO) to INT2 (TDX2).
-; Write a program to calculate the speed of the motor's rotation in
-; revolutions per second and display it on the LCD.
-; Update the display at least every 500ms.
+; a.asm
+;
+;Detecting Motor Speed
+
+; Created: 11/10/2017 1:41:50 PM
+; Author : ottof
+;
+
+;;Need to get external interupt INT2, for reading how often theres a hole
+;;Need a timer interrupt to display speed on the LCD every 100ms
+;;Need to set how to output to LCD
 
 .include "m2560def.inc"
 
-; Delay Constants
+;Constants for delay
 .equ F_CPU = 16000000
-.equ DELAY_1MS = F_CPU / 4 / 1000 - 4 				; 4 cycles per iteration - setup/call-return overhead
+.equ DELAY_1MS = F_CPU / 4 / 1000 - 4
+/////////////////////////////////////////////////
 
-; LCD Instructions
+;LCD Constants
+.set lcddisplayaddress=0b10000000
+
+;; LCD STUFF
 .equ LCD_RS = 7
 .equ LCD_E = 6
 .equ LCD_RW = 5
 .equ LCD_BE = 4
 
-.set LCD_DISP_ON = 0b00001110
-.set LCD_DISP_OFF = 0b00001000
-.set LCD_DISP_CLR = 0b00000001
-
-.set LCD_FUNC_SET = 0b00111000 						; 2 lines, 5 by 7 characters
-.set LCD_ENTR_SET = 0b00000110 						; increment, no display shift
-
-.set LCD_HOME_LINE = 0b10000000 					; goes to 1st line (address 0)
-.set LCD_SEC_LINE = 0b10101000 						; goes to 2nd line (address 40)
-
-; LCD Macros
 .macro do_lcd_command
-	ldi r16, @0
-	rcall lcd_command
-	rcall lcd_wait
-.endmacro
-
-.macro do_lcd_command_reg
-	mov r16, @0
+	ldi r21, @0
 	rcall lcd_command
 	rcall lcd_wait
 .endmacro
 
 .macro do_lcd_data
-	ldi r16, @0
-	rcall lcd_data
-	rcall lcd_wait
-.endmacro
-
-.macro do_lcd_data_reg
-	mov r16, @0
+	mov r22, @0
 	rcall lcd_data
 	rcall lcd_wait
 .endmacro
@@ -60,29 +45,31 @@
 .macro lcd_clr
 	cbi PORTA, @0
 .endmacro
+/////////////////////////////////////////////////
 
-; General
-.def param = r16
-.def numberL = r17
-.def numberH = r18
-.def temp1 = r22
-.def temp2 = r23
-.def address = r24
+;Basic register naming
+.def temp = r16
+.def temp1 = r19
+.def numberLow = r17
+.def numberHigh = r18
+.def 
+/////////////////////////////////////////////////
+
 
 .dseg
 	rps: .byte 2
+	secondCounter : .byte 2
+	tempCounter: .byte 2
 
-	isPrinted: .byte 1
-	digit5: .byte 1
-	digit4: .byte 1
-	digit3: .byte 1
-	digit2: .byte 1
-	digit: .byte 1
+	TenThousand: .byte 1
+	Thousand: .byte 1
+	Hundred: .byte 1
+	Ten: .byte 1
+	One: .byte 1
 
-	SecondCounter: .byte 2
-	TempCounter: .byte 2
 
-.cseg
+	
+.cseg	;;; Got this table from lecture slides
 ; Vector Table
 .org 0x0000
 	jmp RESET
@@ -125,142 +112,118 @@
 DEFAULT:
 	reti							; used for interrupts that are not handled
 
-RESET:
-	ldi r16, low(RAMEND)
-	out SPL, r16
-	ldi r16, high(RAMEND)
-	out SPH, r16
+RESET: 
+	//Stack initialization
+	ldi temp, high(RAMEND)	
+	out SPH, temp
+	ldi temp, low(RAMEND)
+	out SPL, temp
 
-	ser r16 										; set PORTF and PORTA to output (LCD)
-	out DDRF, r16
-	out DDRA, r16
-	clr r16											; clear PORTF and PORTA registers
-	out PORTF, r16
-	out PORTA, r16
+	//Setting outputs
+	ser temp
+	out DDRF, temp;out
+	out DDRA, temp;out
+	clr temp
+	out PORTF, temp
+	out PORTA, temp
 
-	clr r16
-	out DDRD, r16 									; set PORTD (INT2/TDX2) to input
-
-	ldi temp1, (2 << ISC20) 						; set INT2 to trigger on falling edges
-	sts EICRA, temp1
-	ldi temp1, (1 << INT2) 							; enable INT2
-	out EIMSK, temp1
-
-	do_lcd_command LCD_FUNC_SET 					; initialise LCD
-	rcall sleep_5ms
-	do_lcd_command LCD_FUNC_SET
-	rcall sleep_1ms
-	do_lcd_command LCD_FUNC_SET
-	do_lcd_command LCD_FUNC_SET
-	do_lcd_command LCD_DISP_OFF
-	do_lcd_command LCD_DISP_CLR
-	do_lcd_command LCD_ENTR_SET
-	do_lcd_command LCD_DISP_ON
-
-	ldi temp1, LCD_HOME_LINE						; initialise variables
-	mov address, temp1
-	clr numberL
-	clr numberH
-
-	/* Target Timer Count = (Input Frequency / Prescale) / Target Frequency - 1
-						; = (16 000 000 / 1024) / 1 - 1 = 15625
-	ldi temp1, (1 << WGM12) 						; set 16-bit Timer1 to CTC mode
-	ori temp1, (1 << CS12)|(1 << CS10) 				; set prescaler to 1024
-	sts TCCR1B, temp1
-	ldi temp1, low(15625) 							; set compare match value in OCR1A
-	sts OCR1AL, temp1
-	ldi temp1, high(15625)
-	sts OCR1AH, temp1
-	ldi temp1, 1 << OCIE1A 							; enable Timer1 Compare Match Interrupt A
-	sts TIMSK1, temp1 */
-
-	clr temp1
-	sts TempCounter, temp1 			; initialise temporary counter to 0
-	sts TempCounter + 1, temp1
-	sts SecondCounter, temp1 		; initialise second counter to 0
-	sts SecondCounter + 1, temp1
-	ldi temp1, 0b00000010
-	out TCCR0B, temp1 			; set prescaler to 8 = 278 microseconds
-	ldi temp1, 1 << TOIE0 		; enable timer
-	sts TIMSK0, temp1
-
-	sei
-
-halt:
-	jmp halt
-
-INTERRUPT2:
-	push temp1
-
-	ldi temp1, 1
-	add numberL, temp1
-	ldi temp1, 0
-	adc numberH, temp1
+	//Sets port D int2 to an input
+	clr temp
+	out DDRD, r16 
 	
-	INTERRUPT2_EPILOGUE:
-	pop temp1
+	//THIS allows int2 to trigger falling edges which occurs when a 
+	//hole occurs in the motor wheel. Seen this in example code
+	//still to learn what isc20 &  eimsk are.
+	//External Interrupt Control Register A
+	ldi temp, (2 <<ISC20)		
+	sts EICRA, temp
+	ldi temp, (1 << INT2)
+	out EIMSK, temp			
+
+	// LCD Commands
+	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
+	rcall sleep_5ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	rcall sleep_1ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00001000 ; display off?
+	do_lcd_command 0b00000001 ; clear display
+	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
+	do_lcd_command 0b00001110 ; display on,Cursor off, no blink
+	do_lcd_command 0b00011000
+	
+	//temp counter stuff to keep timer counts
+	clr temp	; in this temp is 0, this initalizes counts to 0
+	sts tempCounter, temp
+	sts tempCounter + 1, temp
+	sts secondCounter, temp
+	sts secondCounter + 1, temp
+	//Setting speed/amount of counts for the timer
+	ldi temp, 0b00000010
+	out TCCR0B, temp
+	ldi temp, 1 << TOIE0
+	sts TIMSK0, temp
+	
+
+	//
+	sei		//setting interupt flag
+	rjmp main
+
+end:
+	jmp end
+
+main:
+
+;;Interupt1 stuff
+INTERRUPT2:
+	;prologue
+	push temp
+	;body
+	ldi temp, 1
+	add numberLow ,temp
+	ldi temp, 0
+	adc numberHigh, temp
+	;epilogue
+	pop temp
 	reti
 
+//Updates lcd, shud be called every 100ms
 UPDATE_LCD:
-	push temp1
+	;prologue
+	push temp
+	;body
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	////////CAMERON///////
+	//////////////////////
+	//////////////////////
+	//////////////////////
+	//////////////////////
 
-	ldi address, LCD_HOME_LINE
-	rcall write16
-
-	clr numberL
-	clr numberH
-
-	UPDATE_LCD_EPILOGUE:
-	pop temp1
-	reti
-
-Timer0OVF:						; interrupt subroutine to Timer0
-	in temp1, SREG
-	push temp1 					; save conflict registers
+//INTERRUPT SUBROUTINE FOR TIMER0, not external, for how many
+//interup2s, for each second to get rpms
+Timer0OVF:
+	//prologue: saving conflicting registers and teh status regiser
+	in temp, SREG 
+	push temp
 	push r25
 	push r24
+	;;body
+	lds r24, tempCounter	//getting value of temp coints
+	lds r25, tempCounter + 1
+	adiw r25:r24, 1			//increasing temp counter by 1
 
-	lds r24, TempCounter 		; load value of temporary counter
-	lds r25, TempCounter + 1
-	adiw r25:r24, 1 			; increase temporary counter by 1
-
-	cpi r24, low(3906)			; here use 7812 = 10^6/128 for 1 second
-	ldi temp1, high(3906) 		; use 3906 for 0.5 seconds
-	cpc r25, temp1
-	brne notSecond 				; if they're not equal, jump to notSecond
+	cpi r24, low(781)		//this is due to 7812 = 10000000/128, so 1 second 
+	ldi temp, high(781)		// use 781 for 0.1 seconds
+	cpc r25,temp1
+	// 0.1 seconds past so now to count speed and average it
 	
-	; here we know 0.5 seconds has passed: DO THINGS
-	ldi address, LCD_HOME_LINE
-	asr numberH 				; need to multiply number by 2 to give revolutions per SECOND
-	ror numberL 				; need to divide by 4 to account for 4 holes
-	do_lcd_command LCD_DISP_CLR
-	rcall write16
-	clr numberL
-	clr numberH
 
-	clr temp1
-	sts TempCounter, temp1				; reset temporary counter
-	sts TempCounter + 1, temp1
-	lds r24, SecondCounter 		; load second counter and increase since 1 second has expired
-	lds r25, SecondCounter + 1
-	adiw r25:r24, 1 			; increase second counter by 1
 
-	sts SecondCounter, r24
-	sts SecondCounter + 1, r25
-	rjmp epilogue
-
-	notSecond:
-		sts TempCounter, r24		; store new value of temporary counter
-		sts TempCounter + 1, r25
-
-	epilogue:
-		pop r24
-		pop r25
-		pop temp1
-		out SREG, temp1
-		reti 						; return from interrupt
-
-; LCD Commands
+	; LCD Commands
 lcd_command:
 	out PORTF, r16
 	rcall sleep_1ms
@@ -301,12 +264,15 @@ lcd_wait_loop:
 	pop r16
 	ret
 
-; Delay commands
+
+
+//Delay functions taken from previous lab
 sleep_1ms:
 	push r24
 	push r25
 	ldi r25, high(DELAY_1MS)
 	ldi r24, low(DELAY_1MS)
+
 delayloop_1ms:
 	sbiw r25:r24, 1
 	brne delayloop_1ms
@@ -322,7 +288,7 @@ sleep_5ms:
 	rcall sleep_1ms
 	ret
 
-sleep_20ms:
+sleep_25ms:
 	rcall sleep_5ms
 	rcall sleep_5ms
 	rcall sleep_5ms
@@ -330,218 +296,138 @@ sleep_20ms:
 	rcall sleep_5ms
 	ret
 
-; Writes 16-bit number in numberH:numberL to the LCD in decimal
-write16:
-	push numberH
-	push numberL
+sleep_100ms:
+	rcall sleep_25ms
+	rcall sleep_25ms
+	rcall sleep_25ms
+	rcall sleep_25ms
+	ret
+
+write_number:
+	push numberLow
+	push numberHigh
 	push temp1
 
 	clr temp1
-	sts isPrinted, temp1 							; 0 if not printed, 1 if printed
-	sts digit5, temp1
-	sts digit4, temp1
-	sts digit3, temp1
-	sts digit2, temp1
-	sts digit, temp1
+	sts TenThousand, temp1
+	sts Thousand, temp1
+	sts Hundred, temp1
+	sts Ten, temp1
+	sts One, temp1
 
-	write10000s:
-		mov temp1, numberL
-		cpi temp1, low(10000) 						; check that numberH:numberL > 10000
-		ldi temp1, high(10000)
-		cpc numberH, temp1
-		brlo write1000s
-	
-		loop10000s:
-			mov temp1, numberL
-			cpi temp1, low(10000) 					; if < 10000, display ten thousands digit
-			ldi temp1, high(10000)
-			cpc numberH, temp1
-			brlo display10000s
+	writeTenThousand:
+		cpi numberLow, low(10000)
+		cpc numberHigh, high(10000)
+		brlo writeThousand
 
-			mov temp1, numberL						; decrement parameter by 10000
-			subi temp1, low(10000)
-			mov numberL, temp1
-			mov temp1, numberH
-			sbci temp1, high(10000)
-			mov numberH, temp1
-		   
-			lds temp1, digit5 						; increment ten thousands digit counter
+		loopTenThousand:
+			cpi numberLow, low(10000)			;Compares the number to 10000
+			cpc numberHigh, high(10000)			;if it is less than 10000 branch to the 1000s 
+			brlo displayTenThousand
+
+			subi numberLow, low(10000)			;Minus 10000 from the number
+			sbic numberHigh, high(10000)
+
+			lds temp1, TenThousand				;increase the number in the 10000s column
 			inc temp1
-			sts digit5, temp1
-		   
-			jmp loop10000s
-	   
-		display10000s:
-			lds temp1, digit5 						; only print if ten thousands digit counter > 0
-			cpi temp1, 0
-			breq write1000s
+			sts TenThousand, temp1
 
-			lds temp1, isPrinted 					; set isPrinted to 1
-			ldi temp1, 1
-			sts isPrinted, temp1
+			jmp loopTenThousand					;Repeat until less than 10000, where you have the value of the 10000s column
 
-			lds temp1, digit5 						; convert to ASCII
+		displayTenThousand:
+			lds temp1, TenThousand
 			subi temp1, -'0'
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data_reg temp1
+			do_lcd_command lcddisplayaddress
+			inc lcddisplayaddress
+			do_lcd_data temp1
 
-	write1000s:
-		mov temp1, numberL
-		cpi temp1, low(1000) 						; check that numberH:numberL > 1000
-		ldi temp1, high(1000)
-		cpc numberH, temp1
-		brlo space1000s
-	
-		loop1000s:
-			mov temp1, numberL
-			cpi temp1, low(1000) 					; if < 1000, display thousands digit
-			ldi temp1, high(1000)
-			cpc numberH, temp1
-			brlo display1000s
+	writeThousand:
+		cpi numberLow, low(1000)
+		cpc numberHigh, high(1000)
+		brlo writeHundreds
 
-			mov temp1, numberL					; decrement parameter by 1000
-			subi temp1, low(1000)
-			mov numberL, temp1
-			mov temp1, numberH
-			sbci temp1, high(1000)
-			mov numberH, temp1
-		   
-			lds temp1, digit4 						; increment thousands digit counter
+		loopThousand:
+			cpi numberLow, low(1000)			;Compares the number to 1000
+			cpc numberHigh, high(1000)			;if it is less than 1000 branch to the 100s 
+			brlo displayThousand
+
+			subi numberLow, low(1000)			;Minus 1000 from the number
+			sbic numberHigh, high(1000)
+
+			lds temp1, Thousand				;increase the number in the 1000s column
 			inc temp1
-			sts digit4, temp1
-		   
-			jmp loop1000s
-	   
-		display1000s:
-			lds temp1, digit4 						; print if thousands digit counter > 0
-			cpi temp1, 0
-			breq write100s
+			sts Thousand, temp1
 
-			lds temp1, isPrinted 					; set isPrinted to 1
-			ldi temp1, 1
-			sts isPrinted, temp1
+			jmp loopThousand					;Repeat until less than 1000, where you have the value of the 1000s column
 
-			lds temp1, digit4 						; convert to ASCII
+		displayThousand:
+			lds temp1, Thousand
 			subi temp1, -'0'
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data_reg temp1
+			do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp1
 
-			jmp write100s
+	writeHundreds:
+		cpi numberLow, low(100)
+		cpc numberHigh, high(100)
+		brlo writeTens
 
-		space1000s:
-			lds temp1, isPrinted
-			cpi temp1, 0
-			breq write100s
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data '0'
+		loopHundred:
+			cpi numberLow, low(100)			;Compares the number to 100
+			cpc numberHigh, high(100)			;if it is less than 100 branch to the 10s 
+			brlo displayHundred
 
-	write100s:
-		mov temp1, numberL
-		cpi temp1, low(100) 						; check that numberH:numberL > 100
-		ldi temp1, high(100)
-		cpc numberH, temp1
-		brlo space100s
+			subi numberLow, low(100)			;Minus 100 from the number
+			sbic numberHigh, high(100)
 
-		loop100s:
-			mov temp1, numberL
-			cpi temp1, low(100) 					; if < 100, display hundreds digit
-			ldi temp1, high(100)
-			cpc numberH, temp1
-			brlo display100s
-
-			mov temp1, numberL						; decrement parameter by 100
-			subi temp1, low(100)
-			mov numberL, temp1
-			mov temp1, numberH
-			sbci temp1, high(100)
-			mov numberH, temp1
-		   
-			lds temp1, digit3 						; increment hundreds digit counter
+			lds temp1, Hundred				;increase the number in the 100s column
 			inc temp1
-			sts digit3, temp1
+			sts Hundred, temp1
 
-			jmp loop100s
-	   
-		display100s:
-			lds temp1, digit3 						; only print if hundreds digit counter > 0
-			cpi temp1, 0
-			breq write10s
+			jmp loopHundred					;Repeat until less than 100, where you have the value of the 100s column
 
-			lds temp1, isPrinted 					; set isPrinted to 1
-			ldi temp1, 1
-			sts isPrinted, temp1
-
-			lds temp1, digit3 						; convert to ASCII
+		displayHundred:
+			lds temp1, Hundred
 			subi temp1, -'0'
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data_reg temp1
+			do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp1
 
-			jmp write10s
-		
-		space100s:
-			lds temp1, isPrinted
-			cpi temp1, 0
-			breq write10s
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data '0'
+	writeTens:
+		cpi numberLow, low(10)
+		cpc numberHigh, high(10)
+		brlo writeOnes
 
-	write10s:
-		mov temp1, numberL
-		cpi temp1, 10 								; check that numberH:numberL >= 10
-		brlo space10s
+		loopTen:
+			cpi numberLow, low(10)			;Compares the number to 10
+			cpc numberHigh, high(10)			;if it is less than 10 branch to the 10s 
+			brlo displayTen
 
-		loop10s:
-			mov temp1, numberL
-			cpi temp1, 10 							; if < 10, display tens digit
-			brlo display10s
+			subi numberLow, low(10)			;Minus 10 from the number
+			sbic numberHigh, high(10)
 
-			mov temp1, numberL						; decrement parameter by 10
-			subi temp1, low(10)
-			mov numberL, temp1
-			mov temp1, numberH
-			sbci temp1, high(10)
-			mov numberH, temp1
-
-			lds temp1, digit2 						; increment tens digit counter
+			lds temp1, Ten				;increase the number in the 10s column
 			inc temp1
-			sts digit2, temp1
-		   
-			jmp loop10s
-	   
-		display10s:
-			lds temp1, digit2 						; only print if tens digit counter > 0
-			cpi temp1, 0
-			breq write1s
+			sts Ten, temp1
 
-			lds temp1, digit2 						; convert to ASCII
+			jmp loopTen				;Repeat until less than 10, where you have the value of the 10s column
+
+		displayTen:
+			lds temp1, Ten
 			subi temp1, -'0'
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data_reg temp1
-			jmp write1s
+			do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp1
 
-		space10s:
-			lds temp1, isPrinted
-			cpi temp1, 0
-			breq write1s
-			do_lcd_command_reg address
-			inc address
-			do_lcd_data '0'
-
-	write1s:										; write remaining digit to LCD
-		mov temp1, numberL
+	writeOnes:										; write remaining digit to LCD
+		mov temp1, numberLow
 		subi temp1, -'0' 							; convert to ASCII
-		do_lcd_command_reg address
-		inc address	
-		do_lcd_data_reg temp1
+		do_lcd_command lcddisplayaddress
+		inc lcddisplayaddress
+		do_lcd_data temp1
 
-	write16Epilogue:
 	pop temp1
-	pop numberL
-	pop numberH
+	pop numberHigh
+	pop numberLow
+
 	ret

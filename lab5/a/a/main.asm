@@ -23,12 +23,20 @@
 .equ LCD_E = 6
 .equ LCD_RW = 5
 .equ LCD_BE = 4
+.set LCD_HOME_LINE = 0b00000001
 
 .macro do_lcd_command
 	ldi r21, @0
 	rcall lcd_command
 	rcall lcd_wait
 .endmacro
+
+.macro funky_do_lcd_command
+	mov r21, @0
+	rcall lcd_command
+	rcall lcd_wait
+.endmacro
+
 
 .macro do_lcd_data
 	mov r22, @0
@@ -48,18 +56,25 @@
 ;Basic register naming
 .def temp = r16
 .def fourCounter = r17
-.def numberL = r18
-.def numberH = r19
-.def resultL  = r20
+.def numberL = r24
+.def numberH = r25
+.def resultL = r20
 .def resultH = r21
+.def lcddisplayaddress = r22
+.def tempS = r23
 
 /////////////////////////////////////////////////
 
 
 .dseg
-	rps: .byte 2
 	secondCounter : .byte 2
 	tempCounter: .byte 2
+
+	TenThousand: .byte 1
+	Thousand: .byte 1
+	Hundred: .byte 1
+	Ten: .byte 1
+	One: .byte 1
 
 
 	
@@ -146,6 +161,9 @@ RESET:
 	do_lcd_command 0b00000110 ; increment, no display shift;entry mode
 	do_lcd_command 0b00001110 ; display on,Cursor off, no blink
 	do_lcd_command 0b00011000
+
+	ldi temp, LCD_HOME_LINE				; initialise variables
+	mov lcddisplayaddress, temp
 	
 	//temp counter stuff to keep timer counts
 	//16bit counter
@@ -173,14 +191,16 @@ loop:
 INTERRUPT2:
 	;prolouge
 	push temp
+	push tempS
 	;main
 	ldi temp, 4
 	inc fourCounter
 	cp fourCounter, temp
 	brne NOTFOUR
-	adiw numberHigh:numberLow ,1
+	adiw numberH:numberL, 1
 	clr fourCounter
 	NOTFOUR:
+	pop tempS
 	pop temp
 	reti
 
@@ -191,6 +211,7 @@ Timer0OVF:
 	//prologue: saving conflicting registers and teh status regiser
 	in temp, SREG 
 	push temp
+	push tempS
 	push r25
 	push r24
 	;;body
@@ -206,13 +227,21 @@ Timer0OVF:
 
 	//multiplies by 10, dont need to worry about carry
 	//as rpms wont be high enough
+	pop r24
+	pop r25
 	ldi r23, 10
 	mul numberL, r23
 	mov resultL, r0
 	mov resultH, r1
 	mul numberH, r23
 	add resultH, r0
+	mov numberL, resultL
+	mov numberH, resultH
+	clr resultL
+	clr resultH
 
+	
+	rcall write_number
 	//print "speed = numberH&L" to lcd
 
 
@@ -231,14 +260,72 @@ Timer0OVF:
 	NOTYET:
 		sts tempCounter, r24
 		sts tempCounter + 1, r25
-	
-	epi:
 		pop r24
 		pop r25
+	epi:
+		
+		pop tempS
 		pop temp
 		out SREG, temp
 		reti
 
+
+
+
+
+
+//LCD COMMANDS
+lcd_command:
+	out PORTF, r21
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_E
+	nop
+	nop
+	nop
+	ret
+
+lcd_data:
+	out PORTF, r22
+	lcd_set LCD_RS
+	nop
+	nop
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_E
+	nop
+	nop
+	nop
+	lcd_clr LCD_RS
+	ret
+
+lcd_wait:
+	push r21
+	clr r21
+	out DDRF, r21
+	out PORTF, r21
+	lcd_set LCD_RW
+lcd_wait_loop:
+	nop
+	lcd_set LCD_E
+	nop
+	nop
+        nop
+	in r21, PINF
+	lcd_clr LCD_E
+	sbrc r21, 7
+	rjmp lcd_wait_loop
+	lcd_clr LCD_RW
+	ser r21
+	out DDRF, r21
+	pop r21
+	ret
 
 //Delay functions taken from previous lab
 sleep_1ms:
@@ -275,4 +362,146 @@ sleep_100ms:
 	rcall sleep_25ms
 	rcall sleep_25ms
 	rcall sleep_25ms
+	ret
+
+
+write_number:
+	push numberL
+	push numberH
+	push temp
+	push tempS
+
+
+	ldi lcddisplayaddress, 0b10000000 
+	clr temp
+	sts TenThousand, temp
+	sts Thousand, temp
+	sts Hundred, temp
+	sts Ten, temp
+	sts One, temp
+
+	writeTenThousand:
+		cpi numberL, low(10000)
+		ldi tempS, high(10000)
+		cpc numberH, tempS
+		brlo writeThousand
+
+		loopTenThousand:
+			cpi numberL, low(10000)			;Compares the number to 10000
+			ldi tempS, high(10000)
+			cpc numberH, tempS			;if it is less than 10000 branch to the 1000s 
+			brlo displayTenThousand
+
+			subi numberL, low(10000)			;Minus 10000 from the number
+			sbci numberH, high(10000)
+
+			lds temp, TenThousand				;increase the number in the 10000s column
+			inc temp
+			sts TenThousand, temp
+
+			jmp loopTenThousand					;Repeat until less than 10000, where you have the value of the 10000s column
+
+		displayTenThousand:
+			lds temp, TenThousand
+			subi temp, -'0'
+			funky_do_lcd_command lcddisplayaddress
+			inc lcddisplayaddress
+			do_lcd_data temp
+
+	writeThousand:
+		cpi numberL, low(1000)
+		ldi tempS, high(1000)
+		cpc numberH, tempS
+		brlo writeHundreds
+
+		loopThousand:
+			cpi numberL, low(1000)			;Compares the number to 1000
+			ldi tempS, high(1000)
+			cpc numberH, tempS			;if it is less than 1000 branch to the 100s 
+			brlo displayThousand
+
+			subi numberL, low(1000)			;Minus 1000 from the number
+			sbci numberH, high(1000)
+
+			lds temp, Thousand				;increase the number in the 1000s column
+			inc temp
+			sts Thousand, temp
+
+			jmp loopThousand					;Repeat until less than 1000, where you have the value of the 1000s column
+
+		displayThousand:
+			lds temp, Thousand
+			subi temp, -'0'
+			funky_do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp
+
+	writeHundreds:
+		cpi numberL, low(100)
+		ldi tempS, high(100)
+		cpc numberH, tempS
+		brlo writeTens
+
+		loopHundred:
+			cpi numberL, low(100)			;Compares the number to 100
+			ldi tempS, high(100)
+			cpc numberH, tempS			;if it is less than 100 branch to the 10s 
+			brlo displayHundred
+
+			subi numberL, low(100)			;Minus 100 from the number
+			sbci numberH, high(100)
+
+			lds temp, Hundred				;increase the number in the 100s column
+			inc temp
+			sts Hundred, temp
+
+			jmp loopHundred					;Repeat until less than 100, where you have the value of the 100s column
+
+		displayHundred:
+			lds temp, Hundred
+			subi temp, -'0'
+			funky_do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp
+
+	writeTens:
+		cpi numberL, low(10)
+		ldi tempS, high(10)
+		cpc numberH, tempS
+		brlo writeOnes
+
+		loopTen:
+			cpi numberL, low(10)			;Compares the number to 10
+			ldi tempS, high(10)
+			cpc numberH, tempS			;if it is less than 10 branch to the 10s 
+			brlo displayTen
+
+			subi numberL, low(10)			;Minus 10 from the number
+			sbci numberH, high(10)
+
+			lds temp, Ten				;increase the number in the 10s column
+			inc temp
+			sts Ten, temp
+
+			jmp loopTen				;Repeat until less than 10, where you have the value of the 10s column
+
+		displayTen:
+			lds temp, Ten
+			subi temp, -'0'
+			funky_do_lcd_command lcddisplayaddress 
+			inc lcddisplayaddress
+			do_lcd_data temp
+
+	writeOnes:										; write remaining digit to LCD
+		mov temp, numberL
+		subi temp, -'0' 							; convert to ASCII
+		funky_do_lcd_command lcddisplayaddress
+		inc lcddisplayaddress
+		do_lcd_data temp
+
+	pop tempS
+	pop temp
+	pop numberH
+	pop numberL
+
 	ret
