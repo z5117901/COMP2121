@@ -1,0 +1,318 @@
+
+.include "m2560def.inc"
+
+;
+;==========Defining Registers=========
+.def temp = r16
+.def temp1 = r17
+.def temp2 = r18
+.def counter = r19
+.def lcd = r20
+.def digit = r21
+.def cont4 = r22
+
+;
+;==========LCD Output Macros========
+.macro do_lcd_command
+	ldi lcd, @0
+	rcall lcd_command
+	rcall lcd_wait
+.endmacro
+.macro do_lcd_data
+	ldi lcd, @0
+	rcall lcd_data
+	rcall lcd_wait
+.endmacro
+;===================================
+.macro do_lcd_data_register
+	mov lcd, @0
+	subi lcd, -'0'
+	rcall lcd_data
+	rcall lcd_wait
+.endmacro
+.macro clear
+    ldi YL, low(@0)			; load the memory address to Y
+    ldi YH, high(@0)
+    clr temp 
+    st Y+, temp				; clear the two bytes at @0 in SRAM
+    st Y, temp
+.endmacro
+
+.dseg
+	TimerCounter: .byte 2
+
+.cseg
+.org 0x0000					;By default it is 0 in the code segment
+	jmp RESET
+	jmp DEFAULT				;NO HANDLING FOR IRQ0
+	jmp DEFAULT				;NO HANDLING FOR IRQ1
+.org INT2addr
+	jmp EXT_INT2
+.org OVF0addr				;OVF0addr is the address of Timer0 Overfloew Interrupt Vector
+	jmp Timer0OVF			;Jump to the interrupt handler for Timer0 Overflow
+
+jmp DEFAULT
+DEFAULT: reti
+
+RESET:
+	clr cont4
+	ldi r16, low(RAMEND)
+	out SPL, r16
+	ldi r16, high(RAMEND)
+	out SPH, r16
+	ser temp
+	out DDRC,temp ;set portC output
+	;ini leds light
+	clr temp
+	out PORTC, temp
+	sei
+
+	ser r16					;Set r16 all to 1's
+	out DDRF, r16			
+	out DDRA, r16
+	clr r16					;Setting r16 to 0
+	out PORTF, r16				
+	out PORTA, r16
+
+	do_lcd_command 0b00111000 ; 2x5x7
+	rcall sleep_5ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	rcall sleep_1ms
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00111000 ; 2x5x7
+	do_lcd_command 0b00001000 ; display off?
+	do_lcd_command 0b00000001 ; clear display
+	do_lcd_command 0b00000110 ; increment, no display shift
+	do_lcd_command 0b00001110 ; Cursor on, bar, no blink
+
+	do_lcd_data 'S'			;The LCD screen will dispplay "Speed: "
+	do_lcd_data 'p'
+	do_lcd_data 'e'
+	do_lcd_data 'e'
+	do_lcd_data 'd'
+	do_lcd_data ':'
+	do_lcd_data ' '
+
+	rjmp main
+incrcoun:
+
+	inc counter
+
+	clr cont4
+	jmp back 
+EXT_INT2:
+	in temp, SREG
+	push temp
+	push temp2
+	inc cont4
+	cpi cont4,4
+	breq incrcoun
+	back:
+	
+
+END_INT2:
+	pop temp2
+	pop temp
+	out SREG, temp
+	reti
+
+Timer0OVF:
+	in temp, SREG
+	push temp
+	push YH
+	push YL
+	push r25
+	push r24
+
+newSecond:
+	lds r24, TimerCounter
+	lds r25, TimerCounter+1
+	adiw r25:r24, 1
+
+	cpi r24, low(781)
+	ldi temp, high(781)
+	cpc r25, temp
+	brne notsecond
+
+issecond:
+	do_lcd_command 0b00000001
+	do_lcd_command 0b00000110
+	do_lcd_command 0b00001110
+
+	do_lcd_data 'S'
+	do_lcd_data 'p'
+	do_lcd_data 'e'
+	do_lcd_data 'e'
+	do_lcd_data 'd'
+	do_lcd_data ':'
+	do_lcd_data ' '
+	;do_lcd_command 0b00000001
+	rjmp display
+
+end:
+	clr counter
+	clear TimerCounter
+
+	rjmp ENDIF
+
+
+notsecond:
+
+	sts TimerCounter, r24
+	sts TimerCounter+1, r25
+
+ENDIF:
+	pop r24
+	pop r25
+	pop YL
+	pop YH
+	pop temp
+	out SREG, temp
+	reti
+
+main:
+	clear TimerCounter		;Clearing the value of the timer counter
+	clr counter				;Clearing value in counter
+	clr digit				;Clearing the digit
+	;==========Interrupt==========
+	ldi temp, (2 << ISC20)	;enable ex2
+	sts EICRA, temp
+	in temp, EIMSK
+	ori temp, (1<<INT2)
+	out EIMSK, temp
+	;========Timer=========
+	ldi temp, 0b00000000	;Loading 0 into a temp register
+    out TCCR0A, temp		;Setting TCR0A to a input
+    ldi temp, 0b00000010	;Loading 8 into  a temp register
+    out TCCR0B, temp        ;Setting prescalar value to 8
+    ldi temp, 1<<TOIE0      ;TOIE0 is the bit number of TOIE0 which is 0 (128 microseconds)
+    sts TIMSK0, temp        ;Enale Timer0 overflow Interrupt (T/C0 interrupt enable)
+	sei						;Enable Global Interrupt Bit
+
+loop:
+	rjmp loop
+
+display:
+	;do_lcd_command 0b11000000
+	ldi temp2,10
+	mul counter,temp2
+	mov temp, r0
+	out PORTC,temp
+	clr digit
+
+checkHund:
+	cpi temp, 100
+	brsh countHund
+	cpi digit, 0
+	breq checkTen
+	do_lcd_data_register digit
+	clr digit
+	ldi temp1, 1
+
+checkTen:
+	cpi temp, 10
+	brsh countTen
+	cpi temp1, 1
+	breq ELSE
+	cpi digit, 0
+	breq checkOne
+
+ELSE:
+	do_lcd_data_register digit
+	clr digit
+	rjmp checkOne
+
+checkOne:
+	do_lcd_data_register temp
+	rjmp end
+
+counthund:
+	subi temp, 100
+	inc digit
+	rjmp checkHund
+
+countTen:
+	subi temp, 10
+	inc digit
+	rjmp checkTen
+
+;
+; ========== LCD code provided below :)
+.equ LCD_RS = 7
+.equ LCD_E = 6
+.equ LCD_RW = 5
+.equ LCD_BE = 4
+
+.macro lcd_set
+	sbi PORTA, @0
+.endmacro
+.macro lcd_clr
+	cbi PORTA, @0
+.endmacro
+
+;
+;==========Send a command to the LCD (r20)==========
+lcd_command:
+	out PORTF, lcd			;Displaying contents stored in r20
+	rcall sleep_1ms
+	lcd_set LCD_E
+	rcall sleep_1ms
+	lcd_clr LCD_E
+	rcall sleep_1ms
+	ret
+
+lcd_data:
+	out PORTF, lcd
+	lcd_set LCD_RS
+	rcall sleep_1ms
+	lcd_set LCD_E
+	rcall sleep_1ms
+	lcd_clr LCD_E
+	rcall sleep_1ms
+	lcd_clr LCD_RS
+	ret
+
+lcd_wait:
+	push lcd				;So it doesn't conflict
+	clr lcd					;Set r20 to 0
+	out DDRF, lcd
+	out PORTF, lcd
+	lcd_set LCD_RW
+lcd_wait_loop:
+	rcall sleep_1ms
+	lcd_set LCD_E
+	rcall sleep_1ms
+	in lcd, PINF				;
+	lcd_clr LCD_E
+	sbrc lcd, 7
+	rjmp lcd_wait_loop
+	lcd_clr LCD_RW
+	ser lcd
+	out DDRF, lcd
+	pop lcd
+	ret
+
+;
+;==========LCD Delay Code Below============
+.equ F_CPU = 16000000
+.equ DELAY_1MS = F_CPU / 4 / 1000 - 4
+; 4 cycles per iteration - setup/call-return overhead
+
+sleep_1ms:
+	push r24
+	push r25
+	ldi r25, high(DELAY_1MS)
+	ldi r24, low(DELAY_1MS)
+delayloop_1ms:
+	sbiw r25:r24, 1
+	brne delayloop_1ms
+	pop r25
+	pop r24
+	ret
+sleep_5ms:
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	rcall sleep_1ms
+	ret
