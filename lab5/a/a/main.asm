@@ -63,6 +63,7 @@
 .def lcddisplayaddress = r22
 .def tempS = r23
 
+
 /////////////////////////////////////////////////
 
 
@@ -75,6 +76,7 @@
 	Hundred: .byte 1
 	Ten: .byte 1
 	One: .byte 1
+	button_flag: .byte 1 
 
 
 	
@@ -82,8 +84,8 @@
 ; Vector Table
 .org 0x0000
 	jmp RESET
-	jmp DEFAULT						; IRQ0 Handler
-	jmp DEFAULT						; IRQ1 Handler
+	jmp PBOINTERRUPT				; IRQ0 Handler  PB0 RDX4
+	jmp PB1INTERRUPT				; IRQ1 Handler	PB1 RDX3
 	jmp INTERRUPT2 					; IRQ2 Handler
 	jmp DEFAULT 					; IRQ3 Handler
 	jmp DEFAULT 					; IRQ4 Handler
@@ -177,26 +179,83 @@ RESET:
 	ldi temp, 1 << TOIE0
 	sts TIMSK0, temp
 	
-	clr fourCounter
-	//
-
-	ldi temp, 0b00001000
-	sts DDRL, temp ; set PL3 (OC5A) as output.
-	ldi temp, 0xFF ; this value and the operation mode determine the PWM duty cycle
-	sts OCR5AL, temp
+	////////////////////////////
+	;;setting buttons
 	clr temp
-	sts OCR5AH, temp
-	ldi temp, (1 << CS50) ; CS50=1: no prescaling
-	sts TCCR5B, temp
-	ldi temp, (1<< WGM50)|(1<<COM5A1)
+	;sts button_flag, temp
+	lds temp, EICRA
+	ori temp, (2 << ISC00)
+	ori temp, (2 << ISC10)
+	sts EICRA, temp
+
+	in temp, EIMSK
+	ori temp, (1 << INT0)
+	ori temp, (1 << INT1)
+	out EIMSK, temp
+
+	////PWM STUFF////////////////////////////
+	
+	ldi temp, 0b00001000
+	sts DDRE, temp ; set PL3 (OC5A) as output.
+	ldi temp, 0 ; this value and the operation mode determine the PWM duty cycle
+	sts OCR3AH, temp
+	ldi temp, 0x00
+	sts OCR3AL, temp
+	ldi temp, (1 << CS32) ; CS50=1: no prescaling
+	sts TCCR3B, temp
+	ldi temp, (1<< WGM30)|1 << WGM31|(1<<COM3A1)
 	; WGM50=1: phase correct PWM, 8 bits
 	; COM5A1=1: make OC5A override the normal port functionality of the I/O pin PL3
-	sts TCCR5A, temp
-	sei		//setting interupt flag
+	sts TCCR3A, temp
 
+	sei		//setting interupt flag
+	clr fourCounter
+	clr temp
 //just waiting for interupts now
 loop:	
 	jmp loop
+
+PB0INTERRUPT:
+	push temp
+	out temp, SREG
+	push temp
+
+	//////////////////////
+	////////INCREASE//////
+	//////////////////////
+
+
+	pop temp
+	in SREG, temp
+	pop temp
+	reti
+
+
+PB1INTERRUPT:
+push temp
+	out temp, SREG
+	push temp
+
+	//////////////////////
+	////////DECREASE//////
+	//////////////////////
+
+
+	pop temp
+	in SREG, temp
+	pop temp
+	reti
+
+
+
+
+
+
+
+
+
+
+
 
 ;;Interupt stuff
 //increases count of how many holes seen
@@ -240,7 +299,6 @@ Timer0OVF:
 
 	//multiplies by 10, dont need to worry about carry
 	//as rpms wont be high enough
-	
 	pop r24
 	pop r25
 	ldi r23, 10
@@ -254,12 +312,9 @@ Timer0OVF:
 	clr resultL
 	clr resultH
 	
-	
 	rcall write_number
 	//print "speed = numberH&L" to lcd
 
-
-	
 	//now clear the revolution counter
 	clr numberL
 	clr numberH
@@ -393,6 +448,7 @@ write_number:
 	sts Hundred, temp
 	sts Ten, temp
 	sts One, temp
+
 
 	writeTenThousand:
 		cpi numberL, low(10000)

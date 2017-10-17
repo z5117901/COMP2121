@@ -1,18 +1,18 @@
 <ASSEMBLER_INFO>
  <VERSION>2.2.6</VERSION>
  <DEVICE>"ATmega2560"</DEVICE>
- <WORKING_DIR>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\Debug</WORKING_DIR>
+ <WORKING_DIR>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\Debug</WORKING_DIR>
  <INCLUDE_PATH>
   <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc</DIR>
   <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
   <DIR></DIR>
  </INCLUDE_PATH>
- <SOURCE_FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</SOURCE_FILE>
+ <SOURCE_FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</SOURCE_FILE>
  <INCLUDED_FILES>
   <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc</FILE>
  </INCLUDED_FILES>
  <OBJECT_FILES>
-  <FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\Debug\B.obj</FILE>
+  <FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\Debug\B.obj</FILE>
  </OBJECT_FILES>
  <HEX_FILES>
   <FILE>B.hex</FILE>
@@ -22,43 +22,43 @@
   <FILE>B.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <secondCounter><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>68</LINE></secondCounter>
-  <tempCounter><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>69</LINE></tempCounter>
-  <TenThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>71</LINE></TenThousand>
-  <Thousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>72</LINE></Thousand>
-  <Hundred><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>73</LINE></Hundred>
-  <Ten><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>74</LINE></Ten>
-  <One><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>75</LINE></One>
-  <RESET><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>122</LINE></RESET>
-  <DEFAULT><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>119</LINE></DEFAULT>
-  <INTERRUPT2><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>203</LINE></INTERRUPT2>
-  <Timer0OVF><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>222</LINE></Timer0OVF>
-  <lcd_command><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>291</LINE></lcd_command>
-  <lcd_wait><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>321</LINE></lcd_wait>
-  <sleep_5ms><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>357</LINE></sleep_5ms>
-  <sleep_1ms><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>344</LINE></sleep_1ms>
-  <loop><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>197</LINE></loop>
-  <NOTFOUR><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>214</LINE></NOTFOUR>
-  <NOTYET><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>273</LINE></NOTYET>
-  <write_number><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>381</LINE></write_number>
-  <epi><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>278</LINE></epi>
-  <lcd_data><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>304</LINE></lcd_data>
-  <lcd_wait_loop><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>327</LINE></lcd_wait_loop>
-  <delayloop_1ms><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>350</LINE></delayloop_1ms>
-  <sleep_25ms><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>365</LINE></sleep_25ms>
-  <sleep_100ms><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>373</LINE></sleep_100ms>
-  <writeTenThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>396</LINE></writeTenThousand>
-  <displayTenThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>417</LINE></displayTenThousand>
-  <loopTenThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>402</LINE></loopTenThousand>
-  <writeThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>424</LINE></writeThousand>
-  <displayThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>445</LINE></displayThousand>
-  <loopThousand><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>430</LINE></loopThousand>
-  <writeHundreds><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>452</LINE></writeHundreds>
-  <displayHundred><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>473</LINE></displayHundred>
-  <loopHundred><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>458</LINE></loopHundred>
-  <writeTens><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>480</LINE></writeTens>
-  <displayTen><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>501</LINE></displayTen>
-  <loopTen><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>486</LINE></loopTen>
-  <writeOnes><FILE>C:\Users\Cameron Gan\Documents\GitHub\COMP2121\lab5\B\B\main.asm</FILE><LINE>508</LINE></writeOnes>
+  <secondCounter><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>68</LINE></secondCounter>
+  <tempCounter><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>69</LINE></tempCounter>
+  <TenThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>71</LINE></TenThousand>
+  <Thousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>72</LINE></Thousand>
+  <Hundred><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>73</LINE></Hundred>
+  <Ten><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>74</LINE></Ten>
+  <One><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>75</LINE></One>
+  <RESET><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>122</LINE></RESET>
+  <DEFAULT><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>119</LINE></DEFAULT>
+  <INTERRUPT2><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>203</LINE></INTERRUPT2>
+  <Timer0OVF><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>222</LINE></Timer0OVF>
+  <lcd_command><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>291</LINE></lcd_command>
+  <lcd_wait><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>321</LINE></lcd_wait>
+  <sleep_5ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>357</LINE></sleep_5ms>
+  <sleep_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>344</LINE></sleep_1ms>
+  <loop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>197</LINE></loop>
+  <NOTFOUR><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>214</LINE></NOTFOUR>
+  <NOTYET><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>273</LINE></NOTYET>
+  <write_number><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>381</LINE></write_number>
+  <epi><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>278</LINE></epi>
+  <lcd_data><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>304</LINE></lcd_data>
+  <lcd_wait_loop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>327</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>350</LINE></delayloop_1ms>
+  <sleep_25ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>365</LINE></sleep_25ms>
+  <sleep_100ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>373</LINE></sleep_100ms>
+  <writeTenThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>396</LINE></writeTenThousand>
+  <displayTenThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>417</LINE></displayTenThousand>
+  <loopTenThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>402</LINE></loopTenThousand>
+  <writeThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>424</LINE></writeThousand>
+  <displayThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>445</LINE></displayThousand>
+  <loopThousand><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>430</LINE></loopThousand>
+  <writeHundreds><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>452</LINE></writeHundreds>
+  <displayHundred><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>473</LINE></displayHundred>
+  <loopHundred><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>458</LINE></loopHundred>
+  <writeTens><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>480</LINE></writeTens>
+  <displayTen><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>501</LINE></displayTen>
+  <loopTen><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>486</LINE></loopTen>
+  <writeOnes><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\B\B\main.asm</FILE><LINE>508</LINE></writeOnes>
  </LABELS>
 </ASSEMBLER_INFO>
