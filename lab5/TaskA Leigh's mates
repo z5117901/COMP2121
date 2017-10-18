@@ -1,15 +1,20 @@
-
+;
+; Lab5A.asm
+;
+; Created: 10/15/2017 7:40:36 AM
+; Author : L
+;
 .include "m2560def.inc"
 
 ;
 ;==========Defining Registers=========
 .def temp = r16
 .def temp1 = r17
-.def temp2 = r18
+.def ten = r18
 .def counter = r19
-.def lcd = r20
-.def digit = r21
-.def cont4 = r22
+.def lcd = r20			;Lcd Handle
+.def digit = r21		;Used to display the decimal numbers digit by digit
+.def holes4 = r22		;How many digits do we ahve to display?
 
 ;
 ;==========LCD Output Macros========
@@ -30,6 +35,9 @@
 	rcall lcd_data
 	rcall lcd_wait
 .endmacro
+
+;The macro clears a word (2 bytes) in a memory
+;The parameter A0 is the memory address for that word
 .macro clear
     ldi YL, low(@0)			; load the memory address to Y
     ldi YH, high(@0)
@@ -39,15 +47,17 @@
 .endmacro
 
 .dseg
-	TimerCounter: .byte 2
+	TimerCounter: .byte 2	;Temporary counter to see if 1 second has passed
 
+;
+; ========== LCD code provided below :)==========
 .cseg
 .org 0x0000					;By default it is 0 in the code segment
 	jmp RESET
 	jmp DEFAULT				;NO HANDLING FOR IRQ0
 	jmp DEFAULT				;NO HANDLING FOR IRQ1
-.org INT2addr
-	jmp EXT_INT2
+.org INT2addr				;INT2addr is the address of the External Interrupt Request 2
+	jmp EXT_INT2			;Jumpt to the interrupt handler for the External Interrupt
 .org OVF0addr				;OVF0addr is the address of Timer0 Overfloew Interrupt Vector
 	jmp Timer0OVF			;Jump to the interrupt handler for Timer0 Overflow
 
@@ -55,23 +65,22 @@ jmp DEFAULT
 DEFAULT: reti
 
 RESET:
-	clr cont4
-	ldi r16, low(RAMEND)
+	clr holes4				;Clearing the contents of r22
+	ldi r16, low(RAMEND)	;
 	out SPL, r16
 	ldi r16, high(RAMEND)
 	out SPH, r16
-	ser temp
-	out DDRC,temp ;set portC output
-	;ini leds light
+	ser temp				;Set temp to all 1's
+	out DDRC,temp			;Set PortC to Output
 	clr temp
-	out PORTC, temp
+	out PORTC, temp			;Set all LED's to 0
 	sei
 
 	ser r16					;Set r16 all to 1's
-	out DDRF, r16			
-	out DDRA, r16
+	out DDRF, r16			;Set PortF to Output
+	out DDRA, r16			;Set portA to Output
 	clr r16					;Setting r16 to 0
-	out PORTF, r16				
+	out PORTF, r16			
 	out PORTA, r16
 
 	do_lcd_command 0b00111000 ; 2x5x7
@@ -92,52 +101,54 @@ RESET:
 	do_lcd_data 'd'
 	do_lcd_data ':'
 	do_lcd_data ' '
-
+;================================================
 	rjmp main
-incrcoun:
 
+;==========External Interrupt 2==========
+incCounter:
 	inc counter
-
-	clr cont4
+	clr holes4
 	jmp back 
+
 EXT_INT2:
 	in temp, SREG
-	push temp
-	push temp2
-	inc cont4
-	cpi cont4,4
-	breq incrcoun
+	push temp				;Prologue
+	push ten
+	inc holes4
+	cpi holes4,4				;Check if 1 whole spin has occurred
+	breq incCounter
 	back:
 	
-
 END_INT2:
-	pop temp2
+	pop ten					;Epilgoue
 	pop temp
 	out SREG, temp
 	reti
+;======================================
 
-Timer0OVF:
-	in temp, SREG
-	push temp
-	push YH
+;=========Timer 0 Overflow==========
+Timer0OVF:					;Interrupt subroutine to Timer0
+	in temp, SREG			
+	push temp				;Prologue
+	push YH					;Save all conflicting register in prologue
 	push YL
 	push r25
 	push r24
 
-newSecond:
+newSecond:					;Loading the value of the temporary counter
 	lds r24, TimerCounter
 	lds r25, TimerCounter+1
-	adiw r25:r24, 1
+	adiw r25:r24, 1			;Increasing the temp counter by 1
 
-	cpi r24, low(781)
-	ldi temp, high(781)
+	cpi r24, low(781)		;Check if (r25:r24) = 781 since 7812 = 10^6/128
+	ldi temp, high(781)		;7812 = 10^6/128
 	cpc r25, temp
-	brne notsecond
+	brne notSecond
 
-issecond:
-	do_lcd_command 0b00000001
-	do_lcd_command 0b00000110
-	do_lcd_command 0b00001110
+isSecond:						;100ms is 781, since the counter is at 100ms
+	do_lcd_command 0b00000001	;Clear Display
+	do_lcd_command 0b00000110	;Increment, no display shift
+	do_lcd_command 0b00001110	;Cursor on, bar, no blink
 
 	do_lcd_data 'S'
 	do_lcd_data 'p'
@@ -146,41 +157,38 @@ issecond:
 	do_lcd_data 'd'
 	do_lcd_data ':'
 	do_lcd_data ' '
-	;do_lcd_command 0b00000001
-	rjmp display
+	rjmp display				;100ms has passed, therefore start displaying
 
 end:
 	clr counter
 	clear TimerCounter
+	rjmp EndIf
 
-	rjmp ENDIF
-
-
-notsecond:
-
+notSecond:					;Storing the new value of the temporary counter
 	sts TimerCounter, r24
 	sts TimerCounter+1, r25
 
-ENDIF:
-	pop r24
+EndIf:						;Epilogue starts
+	pop r24					;Restores all conflicting register from stack
 	pop r25
 	pop YL
 	pop YH
 	pop temp
 	out SREG, temp
-	reti
+	reti					;Return from interrupt
+;===========================================
 
 main:
 	clear TimerCounter		;Clearing the value of the timer counter
 	clr counter				;Clearing value in counter
 	clr digit				;Clearing the digit
-	;==========Interrupt==========
-	ldi temp, (2 << ISC20)	;enable ex2
+	;==========External Interrupt==========
+	ldi temp, (2 << ISC20)	;Set INT0 as falling edge triggered interrupt
 	sts EICRA, temp
-	in temp, EIMSK
+	in temp, EIMSK			;Enable INT2
 	ori temp, (1<<INT2)
 	out EIMSK, temp
-	;========Timer=========
+	;========Timer0=========
 	ldi temp, 0b00000000	;Loading 0 into a temp register
     out TCCR0A, temp		;Setting TCR0A to a input
     ldi temp, 0b00000010	;Loading 8 into  a temp register
@@ -191,33 +199,33 @@ main:
 
 loop:
 	rjmp loop
-
+;=========LED Light Display=========
 display:
-	;do_lcd_command 0b11000000
-	ldi temp2,10
-	mul counter,temp2
-	mov temp, r0
-	out PORTC,temp
+	ldi ten,10			;Loading 10 into ten
+	mul counter,ten		;Multiplying counter*10 (Since we did 100ms, this is for 1 second) 
+	mov temp, r0			;Result is moved to temp
+	out PORTC,temp			;Display the LED for the respective speed! 
 	clr digit
+;===================================
 
-checkHund:
-	cpi temp, 100
-	brsh countHund
-	cpi digit, 0
-	breq checkTen
+checkHundred:
+	cpi temp, 100			;Check if number is >100?
+	brsh countHundred		;Branch same or higher
+	cpi digit, 0			;Check if digit is 0 or not. 
+	breq checkTen			;Branch equal
 	do_lcd_data_register digit
 	clr digit
-	ldi temp1, 1
+	ldi temp1,1
 
 checkTen:
-	cpi temp, 10
-	brsh countTen
-	cpi temp1, 1
-	breq ELSE
+	cpi temp, 10			;Check if temp is 10
+	brsh countTen			;Branch shame or higher
+	cpi temp1, 1			;Else see if temp1 is 1
+	breq else
 	cpi digit, 0
 	breq checkOne
 
-ELSE:
+else:
 	do_lcd_data_register digit
 	clr digit
 	rjmp checkOne
@@ -226,15 +234,15 @@ checkOne:
 	do_lcd_data_register temp
 	rjmp end
 
-counthund:
-	subi temp, 100
-	inc digit
-	rjmp checkHund
+countHundred:
+	subi temp, 100			;Substract 100 from the speed 
+	inc digit				;Increase the first digit to be displayed
+	rjmp checkHundred
 
 countTen:
-	subi temp, 10
-	inc digit
-	rjmp checkTen
+	subi temp, 10			;Subtract 10 from the speed
+	inc digit				;Increase the digit aka amount of times it should be displayed
+	rjmp checkTen			
 
 ;
 ; ========== LCD code provided below :)
