@@ -1,22 +1,10 @@
 ;
-
+; Lab5A.asm
 ;
-; Created: 15/10/2017 19:35:51
-; Author : a
+; Created: 10/15/2017 7:40:36 AM
+; Author : L
 ;
-
-
 .include "m2560def.inc"
-
-; Delay Constants
-;.equ F_CPU = 16000000
-;.equ DELAY_1MS = F_CPU / 4 / 1000 - 4 				; 4 cycles per iteration - setup/call-return overhead
-
-; LCD Instructions
-/*.equ LCD_RS = 7
-.equ LCD_E = 6
-.equ LCD_RW = 5
-.equ LCD_BE = 4*/
 
 .def temp = r16
 .def speed = r17
@@ -26,8 +14,9 @@
 .def input = r22
 .def target = r23
 .def flag = r20
-.def cont4=r30
+.def holes4=r30
 
+;=========Setting commands for the LCD=========
 .set LCD_DISP_ON = 0b00001110
 .set LCD_DISP_OFF = 0b00001000
 .set LCD_DISP_CLR = 0b00000001
@@ -35,9 +24,9 @@
 .set LCD_FUNC_SET = 0b00111000 						; 2 lines, 5 by 7 characters
 .set LCD_ENTR_SET = 0b00000110 						; increment, no display shift
 .set LCD_HOME_LINE = 0b10000000 					; goes to 1st line (address 0)
-
 .set LCD_SEC_LINE = 0b10101000 						; goes to 2nd line (address 40)
 
+;==========Macros at The Top of the Code==========
 .macro clear
 	ldi YL, low(@0)		; load the memory address to Y
 	ldi YH, high(@0)
@@ -45,6 +34,8 @@
 	st Y+, temp			; clear the two bytes at @0 in SRAM
 	st Y, temp
 .endmacro
+
+;==========For displaying the values on the LCD=========
 .macro do_lcd_command
 	ldi r16, @0
 	rcall lcd_command
@@ -63,6 +54,7 @@
 	rcall lcd_wait
 .endmacro
 
+;==========Macros before the LCD Display==========
 .macro lcd_set
 	sbi PORTA, @0
 .endmacro
@@ -70,14 +62,15 @@
 .macro lcd_clr
 	cbi PORTA, @0
 .endmacro
+;=================================================
 
 .dseg
 .org 0x0200
 Zero:
-	.byte 1
+	.byte 1			;One-byte 
 DebounceCounter:
-	.byte 2
-              ; Two-byte counter for counting seconds.   
+	.byte 2			; Two-byte counter for counting seconds. 
+                
 TC:	
 	.byte 2 
 
@@ -91,14 +84,12 @@ TC:
 	jmp PB_1
 .org INT2addr
    jmp motor_speed
-
 .org OVF0addr
 	jmp Timer0OVF	; Jump to the interrupt handler for
 	jmp DEFAULT		; default service for all other interrupts.
 
 DEFAULT: reti		; no service
 					; continued
-
 
 RESET:
 	ldi r16, low(RAMEND)
@@ -135,26 +126,26 @@ RESET:
 main:
 	clr input
 	clr target
-	ldi temp, (1<<PE4)		;labeled PE2 acctully PE4 
+	ldi temp, (1<<PE4)		;labeled PE2 actually PE4 
 	out DDRE, temp   ;outp
 	clr temp
 	;timer3
 	;ldi temp,0x4A
-	sts OCR3BL, temp;determine duty free
+	sts OCR3BL, temp										;determine duty free
 	clr temp
 	sts OCR3BH, temp
 	;set interrupt
-	ldi temp, (1 << ISC21 | 1 << ISC11 | 1 << ISC01)      ; set INT2 as falling-
-    sts EICRA, temp             ; edge triggered interrupt
+	ldi temp, (1 << ISC21 | 1 << ISC11 | 1 << ISC01)      	; set INT2 as falling-
+    sts EICRA, temp             							; edge triggered interrupt
 	;enable interrupt
-    in temp, EIMSK              ; enable INT2
+    in temp, EIMSK              							; enable INT2
     ori temp, (1<<INT2 | 1<<INT1 | 1<<INT0)
     out EIMSK, temp
 	;set timer interrupt
-	ldi temp, (1<< WGM30)|(1<<COM3B1) ; set the Timer3 to Phase Correct PWM mode.
+	ldi temp, (1<< WGM30)|(1<<COM3B1) 						; set the Timer3 to Phase Correct PWM mode.
 	sts TCCR3A, temp
 	ldi temp, (1 << CS31)
-	sts TCCR3B, temp		; Prescaling value=8
+	sts TCCR3B, temp										; Prescaling value=8
 	
 	clr temp
 	;timer0
@@ -194,6 +185,8 @@ IncreaseSpeed:
 	subi target,-20
 return1:
 	reti
+	
+;==========Timer0 Overflow Interupt=========
 Timer0OVF:
 
 	in temp, SREG
@@ -202,9 +195,9 @@ Timer0OVF:
 	push YL
 	push r25
 	push r24
-	// Update Debounce Flag here
-	lds R24,DebounceCounter
-	lds R25,DebounceCounter+1
+	;=========Update Debounce Flag here==========
+	lds r24,DebounceCounter
+	lds r25,DebounceCounter+1
 	adiw r25:r24,1;
 	cpi r24, low(2200)		;set the debounce
 	ldi temp,high(2200)
@@ -337,20 +330,21 @@ showNumber:
 
 incrcoun:
 	inc value
-	clr cont4
+	clr holes4
 	jmp back
 
 motor_speed:
 	in temp, SREG
 	push temp
-	inc cont4
-	cpi cont4,4
+	inc holes4
+	cpi holes4,4
 	breq incrcoun
 	back:
 	pop temp
 	out SREG, temp
 	reti
-;==============================
+
+;==========Send a command to the LCD (r16)=========
 ; Delay Constants
 .equ F_CPU = 16000000
 .equ DELAY_1MS = F_CPU / 4 / 1000 - 4 				; 4 cycles per iteration - setup/call-return overhead
