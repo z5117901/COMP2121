@@ -142,12 +142,12 @@ main:
 	ldi temp, (1 << ISC21 | 1 << ISC11 | 1 << ISC01)      ; set INT2 as falling-edge 
     sts EICRA, temp             ; edge triggered interrupt
 ;=========Enable Interrupt=========
-    in temp, EIMSK              ; enable INT2
+    in temp, EIMSK              ; enable INT2,INT1,INT0
     ori temp, (1<<INT2 | 1<<INT1 | 1<<INT0)
     out EIMSK, temp
 ;=========Set Timer Interrupt========
 	ldi temp, (1<<WGM30)|(1<<COM3B1) ; set the Timer3 to Phase Correct PWM mode (8-bit) aka Mode1
-	sts TCCR3A, temp
+	sts TCCR3A, temp 
 	ldi temp, (1<<CS31)
 	sts TCCR3B, temp		; Prescaling value=8
 	clr temp
@@ -155,7 +155,7 @@ main:
 	out TCCR0A, temp		;Loading 0 into temp register
 	ldi temp, (1<<CS01)
 	out TCCR0B, temp		; Prescaling value=8
-	ldi temp, 1<<TOIE0		; Enable timeroverflow flag
+	ldi temp, 1<<TOIE0		; Enable Timeroverflow flag
 	sts TIMSK0, temp	
 	sts Zero, input			;Loading 0 into Zero register
 	sei						; Enable global interrupt
