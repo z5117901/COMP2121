@@ -152,12 +152,12 @@ main:
 	sts TCCR3B, temp		; Prescaling value=8
 	clr temp
 ;==========Timer0=========
-	out TCCR0A, temp
+	out TCCR0A, temp		;Loading 0 into temp register
 	ldi temp, (1<<CS01)
 	out TCCR0B, temp		; Prescaling value=8
 	ldi temp, 1<<TOIE0		; Enable timeroverflow flag
 	sts TIMSK0, temp	
-	sts Zero, input
+	sts Zero, input			;Loading 0 into Zero register
 	sei						; Enable global interrupt
 
 loop:
