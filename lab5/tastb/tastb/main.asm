@@ -160,10 +160,10 @@ RESET:
 	out PORTD, temp
 
 	//sets BUTTONS I THINK
-	ldi temp, (2 << ISC10) | ( 2 << ISC00 )
+	ldi temp, (2 << ISC10) | ( 2 << ISC00 ) | (2<<ISC20)
 	sts EICRA, temp
 	in temp, EIMSK
-	ori temp, (1<<INT1) | (1<<INT0)
+	ori temp, (1<<INT1) | (1<<INT0) | (1<<INT2)
 	out EIMSK, temp
 	clr temp
 	clr flag
@@ -172,11 +172,9 @@ RESET:
 	//hole occurs in the motor wheel. Seen this in example code
 	//still to learn what isc20 &  eimsk are.
 	//External Interrupt Control Register A
-	ldi temp, (2 <<ISC20)		
-	sts EICRA, temp
-	ldi temp, (1 << INT2)
-	out EIMSK, temp			
-
+	
+			
+	
 	// LCD Commands
 	do_lcd_command 0b00111000 ; 2x5x7; 0b001 DL N F x x;function set
 	rcall sleep_5ms
@@ -266,13 +264,14 @@ EXT_INT0:
 
 EXT_INT1:
 	;debounce
+	/*
 	cpi flag, 1 ;skips delay if flag is set
 	brne br1
 	rcall sleep_100ms
 	clr flag
 	br1:
 	ldi flag, 1 ;sets flag
-
+	*/
 	;prologue
 	push temp
 	in temp, SREG
@@ -280,6 +279,7 @@ EXT_INT1:
 
 	ser temp
 	out PORTC, temp
+	/*
 	;body
 	lds temp, MotorSpeed
 	cpi temp, 0xFF
@@ -288,11 +288,12 @@ EXT_INT1:
 
 	;epilogue
 	end1:
+	*/
 	pop temp
 	out SREG, temp
 	pop temp
-
-	rcall sleep_25ms
+	
+	//rcall sleep_25ms
 	reti
 
 
@@ -614,3 +615,6 @@ write_number:
 	pop numberL
 
 	ret
+
+
+

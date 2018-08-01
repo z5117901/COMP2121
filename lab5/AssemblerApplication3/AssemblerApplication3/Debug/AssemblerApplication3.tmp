@@ -1,0 +1,67 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.6</VERSION>
+ <DEVICE>"ATmega2560"</DEVICE>
+ <WORKING_DIR>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.132\avrasm\inc\m2560def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\Debug\AssemblerApplication3.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>AssemblerApplication3.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>AssemblerApplication3.map</FILE>
+  <FILE>AssemblerApplication3.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <Zero><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>76</LINE></Zero>
+  <DebounceCounter><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>78</LINE></DebounceCounter>
+  <TC><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>81</LINE></TC>
+  <RESET><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>103</LINE></RESET>
+  <PB_0><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>175</LINE></PB_0>
+  <PB_1><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>186</LINE></PB_1>
+  <motor_speed><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>343</LINE></motor_speed>
+  <Timer0OVF><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>197</LINE></Timer0OVF>
+  <DEFAULT><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>99</LINE></DEFAULT>
+  <lcd_command><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>363</LINE></lcd_command>
+  <lcd_wait><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>383</LINE></lcd_wait>
+  <sleep_5ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>415</LINE></sleep_5ms>
+  <sleep_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>403</LINE></sleep_1ms>
+  <main><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>135</LINE></main>
+  <loop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>172</LINE></loop>
+  <DecreaseSpeed><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>179</LINE></DecreaseSpeed>
+  <return0><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>184</LINE></return0>
+  <IncreaseSpeed><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>190</LINE></IncreaseSpeed>
+  <return1><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>195</LINE></return1>
+  <SetDebounceFlag><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>217</LINE></SetDebounceFlag>
+  <TimeCounter><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>222</LINE></TimeCounter>
+  <NotaSecond><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>257</LINE></NotaSecond>
+  <continue><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>236</LINE></continue>
+  <UpdateTime><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>252</LINE></UpdateTime>
+  <decrease><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>247</LINE></decrease>
+  <UpdateSpeed><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>270</LINE></UpdateSpeed>
+  <Endif><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>261</LINE></Endif>
+  <display><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>285</LINE></display>
+  <Dloop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>287</LINE></Dloop>
+  <hunderd><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>304</LINE></hunderd>
+  <ten><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>318</LINE></ten>
+  <go><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>298</LINE></go>
+  <lcd_data><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>372</LINE></lcd_data>
+  <return><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>301</LINE></return>
+  <Hloop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>308</LINE></Hloop>
+  <showNumber><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>332</LINE></showNumber>
+  <Tloop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>322</LINE></Tloop>
+  <incrcoun><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>338</LINE></incrcoun>
+  <back><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>349</LINE></back>
+  <lcd_wait_loop><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>389</LINE></lcd_wait_loop>
+  <delayloop_1ms><FILE>C:\Users\ottof\Desktop\2121\gitstuff\lab5\AssemblerApplication3\AssemblerApplication3\main.asm</FILE><LINE>408</LINE></delayloop_1ms>
+ </LABELS>
+</ASSEMBLER_INFO>
